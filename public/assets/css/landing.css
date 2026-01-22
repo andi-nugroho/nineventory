@@ -1,0 +1,177 @@
+/* Red/Orange Gradient Animation - Vault Inspired */
+@keyframes gradientShift {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.animated-gradient {
+    background: radial-gradient(80% 55% at 50% 52%, rgba(252, 166, 154, 0.45) 0%, rgba(214, 76, 82, 0.46) 27%, rgba(61, 36, 47, 0.38) 47%, rgba(39, 38, 67, 0.45) 60%, rgba(8, 8, 12, 0.92) 78%, rgba(0, 0, 0, 1) 88%),
+        radial-gradient(85% 60% at 14% 0%, rgba(255, 193, 171, 0.65) 0%, rgba(233, 109, 99, 0.58) 30%, rgba(48, 24, 28, 0.0) 64%),
+        radial-gradient(70% 50% at 86% 22%, rgba(255, 112, 88, 0.40) 0%, rgba(16, 18, 28, 0.0) 55%),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0) 40%);
+    background-size: 200% 200%;
+    animation: gradientShift 15s ease infinite;
+}
+
+/* Grid Overlay */
+.grid-overlay {
+    background-image:
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.09) 0 1px, transparent 1px 96px),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 24px),
+        repeating-radial-gradient(80% 55% at 50% 52%, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 120px);
+    background-blend-mode: screen;
+}
+
+/* Fade In Animation */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+.fade-in-delay-1 {
+    animation: fadeInUp 0.8s ease-out 0.2s forwards;
+    opacity: 0;
+}
+
+.fade-in-delay-2 {
+    animation: fadeInUp 0.8s ease-out 0.3s forwards;
+    opacity: 0;
+}
+
+.fade-in-delay-3 {
+    animation: fadeInUp 0.8s ease-out 0.4s forwards;
+    opacity: 0;
+}
+
+/* Subtle Pulse */
+@keyframes subtlePulse {
+
+    0%,
+    100% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+.subtle-pulse {
+    animation: subtlePulse 2s ease-in-out infinite;
+}
+
+/* Pillar Animations */
+@keyframes pillarGrow {
+    from {
+        height: 0%;
+    }
+
+    to {
+        height: var(--pillar-height);
+    }
+}
+
+.pillar-1 {
+    --pillar-height: 92%;
+    animation: pillarGrow 1s ease-out 0.1s forwards;
+    height: 0;
+}
+
+.pillar-2 {
+    --pillar-height: 84%;
+    animation: pillarGrow 1s ease-out 0.2s forwards;
+    height: 0;
+}
+
+.pillar-3 {
+    --pillar-height: 78%;
+    animation: pillarGrow 1s ease-out 0.3s forwards;
+    height: 0;
+}
+
+.pillar-4 {
+    --pillar-height: 70%;
+    animation: pillarGrow 1s ease-out 0.4s forwards;
+    height: 0;
+}
+
+.pillar-5 {
+    --pillar-height: 62%;
+    animation: pillarGrow 1s ease-out 0.5s forwards;
+    height: 0;
+}
+
+.pillar-6 {
+    --pillar-height: 54%;
+    animation: pillarGrow 1s ease-out 0.6s forwards;
+    height: 0;
+}
+
+.pillar-7 {
+    --pillar-height: 46%;
+    animation: pillarGrow 1s ease-out 0.7s forwards;
+    height: 0;
+}
+
+.pillar-8 {
+    --pillar-height: 34%;
+    animation: pillarGrow 1s ease-out 0.8s forwards;
+    height: 0;
+}
+
+.pillar-9 {
+    --pillar-height: 18%;
+    animation: pillarGrow 1s ease-out 0.9s forwards;
+    height: 0;
+}
+
+/* Scroll Reveal */
+@keyframes scrollReveal {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.scroll-reveal {
+    opacity: 0;
+    animation: scrollReveal 0.6s ease-out forwards;
+}
+
+/* Floating Navbar Transitions */
+header {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+header.scrolled {
+    background: rgba(0, 0, 0, 0.7) !important;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}

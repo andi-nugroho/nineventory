@@ -1,0 +1,26 @@
+{
+    "name": "nineventory/office-inventory-system",
+    "description": "Modern office inventory loan system with AI chatbot powered by Google Gemini",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "NINEVENTORY Team",
+            "email": "admin@nineventory.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "guzzlehttp/guzzle": "^7.8",
+        "vlucas/phpdotenv": "^5.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nineventory\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}
