@@ -10,127 +10,142 @@ $auth->requireLogin();
 
 $loan = new Loan($pdo);
 $currentUser = $auth->getCurrentUser();
+$isAdmin = $auth->isAdmin();
 
 $myLoans = $loan->getByUserId($currentUser['id']);
 ?>
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Peminjaman - NINEVENTORY</title>
+    <title>Loan History - NINEVENTORY</title>
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/dashboard.css">
-    <link rel="stylesheet" href="../assets/css/chatbot.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#FF6626', // Orange
+                        secondary: '#1E293B', // Slate 800
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
-<body>
-    <div class="dashboard-wrapper">
-        <aside class="sidebar">
-            <div class="sidebar-brand">
-                <img src="../assets/images/logo.svg" alt="NINEVENTORY">
-                <h3>NINEVENTORY</h3>
-            </div>
-            
-            <nav class="sidebar-menu">
-                <div class="menu-section-title">Main Menu</div>
-                <a href="../dashboard.php" class="menu-item">
-                    <span class="menu-item-icon">📊</span>
-                    <span>Dashboard</span>
-                </a>
-                
-                <div class="menu-section-title">User</div>
-                <a href="browse.php" class="menu-item">
-                    <span class="menu-item-icon">🔍</span>
-                    <span>Lihat Barang</span>
-                </a>
-                <a href="request.php" class="menu-item">
-                    <span class="menu-item-icon">➕</span>
-                    <span>Ajukan Peminjaman</span>
-                </a>
-                <a href="history.php" class="menu-item active">
-                    <span class="menu-item-icon">📜</span>
-                    <span>Riwayat Peminjaman</span>
-                </a>
-                
-                <div class="menu-section-title">Account</div>
-                <a href="../logout.php" class="menu-item">
-                    <span class="menu-item-icon">🚪</span>
-                    <span>Logout</span>
-                </a>
-            </nav>
-        </aside>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans text-slate-800 dark:text-white transition-colors duration-300"
+      x-data="{ 
+          darkMode: localStorage.getItem('theme') === 'dark',
+          toggleTheme() {
+              this.darkMode = !this.darkMode;
+              localStorage.setItem('theme', this.darkMode ? 'dark' : 'light');
+              if (this.darkMode) {
+                  document.documentElement.classList.add('dark');
+              } else {
+                  document.documentElement.classList.remove('dark');
+              }
+          }
+      }"
+      x-init="$watch('darkMode', val => val ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark')); if(darkMode) document.documentElement.classList.add('dark');">
+    
+    <div class="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
         
-        <main class="main-content">
-            <div class="topbar">
-                <div class="topbar-title">
-                    <h1>Riwayat Peminjaman</h1>
-                </div>
-                <div class="topbar-actions">
-                    <div class="user-profile">
-                        <div class="user-avatar"><?= strtoupper(substr($currentUser['username'], 0, 1)) ?></div>
-                        <div class="user-info">
-                            <h4><?= htmlspecialchars($currentUser['username']) ?></h4>
-                            <p>User</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- Animated Background Gradient -->
+        <div class="fixed inset-0 -z-10 bg-gray-50 dark:bg-gray-950">
+            <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-orange-500/10 blur-[100px] animate-pulse"></div>
+            <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-red-500/10 blur-[100px] animate-pulse"></div>
+        </div>
+
+        <?php 
+        $activePage = 'history';
+        $pathPrefix = '../';
+        include '../includes/sidebar.php'; 
+        ?>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
             
-            <div class="content-area">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Riwayat Peminjaman Saya</h3>
-                    </div>
-                    <div class="card-body">
+            <?php 
+            $pageTitle = 'Loan History';
+            include '../includes/header.php'; 
+            ?>
+
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth hide-scrollbar">
+                <div class="max-w-7xl mx-auto">
+                    <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+                        <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">My Loans</h3>
+                            <a href="request.php" class="px-4 py-2 bg-orange-600 text-white rounded-xl text-sm font-medium hover:bg-orange-700 shadow-md shadow-orange-500/20">New Request</a>
+                        </div>
+                        
                         <?php if (empty($myLoans)): ?>
-                            <p class="text-muted">Anda belum pernah mengajukan peminjaman.</p>
-                            <a href="request.php" class="btn btn-primary">Ajukan Peminjaman Sekarang</a>
+                            <div class="p-12 text-center text-gray-500 dark:text-gray-400 flex flex-col items-center">
+                                <i data-lucide="history" class="w-12 h-12 text-gray-300 dark:text-gray-600 mb-4"></i>
+                                <p>You haven't made any loan requests yet.</p>
+                            </div>
                         <?php else: ?>
-                            <div class="table-responsive">
-                                <table>
-                                    <thead>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left">
+                                    <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400">
                                         <tr>
-                                            <th>Barang</th>
-                                            <th>Kategori</th>
-                                            <th>Jumlah</th>
-                                            <th>Tanggal Pinjam</th>
-                                            <th>Tanggal Kembali</th>
-                                            <th>Status</th>
-                                            <th>Keterangan</th>
+                                            <th class="px-6 py-4 font-semibold">Item</th>
+                                            <th class="px-6 py-4 font-semibold">Borrowed Date</th>
+                                            <th class="px-6 py-4 font-semibold">Return Date</th>
+                                            <th class="px-6 py-4 font-semibold">Qty</th>
+                                            <th class="px-6 py-4 font-semibold">Status</th>
+                                            <th class="px-6 py-4 font-semibold">Notes</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                         <?php foreach ($myLoans as $item): ?>
-                                            <tr>
-                                                <td><?= htmlspecialchars($item['nama_barang']) ?></td>
-                                                <td><?= htmlspecialchars($item['kategori']) ?></td>
-                                                <td><?= $item['jumlah'] ?></td>
-                                                <td><?= date('d/m/Y', strtotime($item['tanggal_pinjam'])) ?></td>
-                                                <td><?= $item['tanggal_kembali'] ? date('d/m/Y', strtotime($item['tanggal_kembali'])) : '-' ?></td>
-                                                <td>
-                                                    <?php
-                                                    $badgeClass = match($item['status']) {
-                                                        'approved' => 'badge-success',
-                                                        'pending' => 'badge-warning',
-                                                        'rejected' => 'badge-danger',
-                                                        'returned' => 'badge-primary',
-                                                        default => 'badge-primary'
-                                                    };
-                                                    ?>
-                                                    <span class="badge <?= $badgeClass ?>">
-                                                        <?= ucfirst($item['status']) ?>
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <?php if ($item['status'] === 'rejected' && $item['alasan_reject']): ?>
-                                                        <small class="text-danger"><?= htmlspecialchars($item['alasan_reject']) ?></small>
-                                                    <?php else: ?>
-                                                        <?= htmlspecialchars($item['keterangan'] ?? '-') ?>
-                                                    <?php endif; ?>
-                                                </td>
-                                            </tr>
+                                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                                <?= htmlspecialchars($item['nama_barang']) ?>
+                                                <div class="text-xs text-gray-500 font-normal mt-0.5"><?= htmlspecialchars($item['kategori']) ?></div>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= date('M d, Y', strtotime($item['tanggal_pinjam'])) ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= $item['tanggal_kembali'] ? date('M d, Y', strtotime($item['tanggal_kembali'])) : '-' ?></td>
+                                            <td class="px-6 py-4 text-sm font-semibold"><?= $item['jumlah'] ?></td>
+                                            <td class="px-6 py-4">
+                                                <?php
+                                                $statusColor = match($item['status']) {
+                                                    'approved' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                                                    'pending' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+                                                    'rejected' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                                                    'returned' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                                                    default => 'bg-gray-100 text-gray-700'
+                                                };
+                                                ?>
+                                                <span class="px-2 py-1 rounded-lg text-xs font-semibold <?= $statusColor ?>">
+                                                    <?= ucfirst($item['status']) ?>
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                                <?php if ($item['status'] === 'rejected' && $item['alasan_reject']): ?>
+                                                    <span class="text-red-500 dark:text-red-400">Reason: <?= htmlspecialchars($item['alasan_reject']) ?></span>
+                                                <?php else: ?>
+                                                    <?= htmlspecialchars($item['keterangan'] ?? '-') ?>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
                                         <?php endforeach; ?>
                                     </tbody>
                                 </table>
@@ -138,13 +153,14 @@ $myLoans = $loan->getByUserId($currentUser['id']);
                         <?php endif; ?>
                     </div>
                 </div>
-            </div>
-        </main>
+            </main>
+        </div>
     </div>
     
-    <?php include '../includes/chatbot-widget.php'; ?>
+    <!-- Initialize Lucide -->
+    <script>lucide.createIcons();</script>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <?php include '../includes/chatbot-widget.php'; ?>
     <script src="../assets/js/chatbot.js"></script>
 </body>
 </html>

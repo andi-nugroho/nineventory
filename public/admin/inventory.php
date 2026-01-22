@@ -10,6 +10,7 @@ $auth->requireAdmin();
 
 $inventory = new Inventory($pdo);
 $currentUser = $auth->getCurrentUser();
+$isAdmin = $auth->isAdmin();
 
 $message = '';
 $error = '';
@@ -59,182 +60,195 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $items = $inventory->getAll();
 ?>
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kelola Inventaris - NINEVENTORY</title>
+    <title>Manage Inventory - NINEVENTORY</title>
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/dashboard.css">
-    <link rel="stylesheet" href="../assets/css/chatbot.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#FF6626', // Orange
+                        secondary: '#1E293B', // Slate 800
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
-<body>
-    <div class="dashboard-wrapper">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-brand">
-                <img src="../assets/images/logo.svg" alt="NINEVENTORY">
-                <h3>NINEVENTORY</h3>
-            </div>
-            
-            <nav class="sidebar-menu">
-                <div class="menu-section-title">Main Menu</div>
-                <a href="../dashboard.php" class="menu-item">
-                    <span class="menu-item-icon">📊</span>
-                    <span>Dashboard</span>
-                </a>
-                
-                <div class="menu-section-title">Admin</div>
-                <a href="inventory.php" class="menu-item active">
-                    <span class="menu-item-icon">📦</span>
-                    <span>Kelola Inventaris</span>
-                </a>
-                <a href="loans.php" class="menu-item">
-                    <span class="menu-item-icon">📋</span>
-                    <span>Persetujuan Peminjaman</span>
-                </a>
-                
-                <div class="menu-section-title">Account</div>
-                <a href="../logout.php" class="menu-item">
-                    <span class="menu-item-icon">🚪</span>
-                    <span>Logout</span>
-                </a>
-            </nav>
-        </aside>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans text-slate-800 dark:text-white transition-colors duration-300"
+      x-data="{ 
+          darkMode: localStorage.getItem('theme') === 'dark',
+          toggleTheme() {
+              this.darkMode = !this.darkMode;
+              localStorage.setItem('theme', this.darkMode ? 'dark' : 'light');
+              if (this.darkMode) {
+                  document.documentElement.classList.add('dark');
+              } else {
+                  document.documentElement.classList.remove('dark');
+              }
+          }
+      }"
+      x-init="$watch('darkMode', val => val ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark')); if(darkMode) document.documentElement.classList.add('dark');">
+    
+    <div class="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
         
+        <!-- Animated Background Gradient -->
+        <div class="fixed inset-0 -z-10 bg-gray-50 dark:bg-gray-950">
+            <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-orange-500/10 blur-[100px] animate-pulse"></div>
+            <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-red-500/10 blur-[100px] animate-pulse"></div>
+        </div>
+
+        <?php 
+        $activePage = 'inventory';
+        $pathPrefix = '../';
+        include '../includes/sidebar.php'; 
+        ?>
+
         <!-- Main Content -->
-        <main class="main-content">
-            <div class="topbar">
-                <div class="topbar-title">
-                    <h1>Kelola Inventaris</h1>
-                </div>
-                <div class="topbar-actions">
-                    <div class="user-profile">
-                        <div class="user-avatar"><?= strtoupper(substr($currentUser['username'], 0, 1)) ?></div>
-                        <div class="user-info">
-                            <h4><?= htmlspecialchars($currentUser['username']) ?></h4>
-                            <p>Admin</p>
+        <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+            
+            <?php 
+            $pageTitle = 'Manage Inventory';
+            include '../includes/header.php'; 
+            ?>
+
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth hide-scrollbar">
+                <div class="max-w-7xl mx-auto space-y-6">
+                    
+                    <?php if ($message): ?>
+                        <div class="p-4 rounded-2xl bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 flex items-center gap-3">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i> <?= htmlspecialchars($message) ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($error): ?>
+                        <div class="p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 flex items-center gap-3">
+                            <i data-lucide="alert-circle" class="w-5 h-5"></i> <?= htmlspecialchars($error) ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- Add Item Form -->
+                    <div x-data="{ open: false }">
+                        <button @click="open = !open" class="w-full md:w-auto px-4 py-2 bg-orange-600 text-white rounded-xl mb-4 flex items-center gap-2 hover:bg-orange-700 transition">
+                            <i data-lucide="plus" class="w-4 h-4"></i> <span x-text="open ? 'Close Form' : 'Add New Item'"></span>
+                        </button>
+                        
+                        <div x-show="open" x-transition.origin.top class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm mb-8">
+                            <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Add New Item</h3>
+                            </div>
+                            <div class="p-6">
+                                <form method="POST" class="space-y-4">
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Item Name</label>
+                                            <input type="text" name="nama_barang" required class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                                            <input type="text" name="kategori" required class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Stock</label>
+                                            <input type="number" name="stok_total" min="0" required class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Condition</label>
+                                            <select name="kondisi" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
+                                                <option value="baik">Good (Baik)</option>
+                                                <option value="rusak ringan">Minor Damage (Rusak Ringan)</option>
+                                                <option value="rusak berat">Major Damage (Rusak Berat)</option>
+                                            </select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
+                                            <input type="text" name="lokasi" required class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
+                                        </div>
+                                        <div class="col-span-full">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                                            <textarea name="deskripsi" rows="2" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none"></textarea>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="px-6 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium rounded-xl hover:opacity-90 transition">Save Item</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <div class="content-area">
-                <?php if ($message): ?>
-                    <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
-                <?php endif; ?>
                 
-                <?php if ($error): ?>
-                    <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
-                <?php endif; ?>
-                
-                <!-- Add Item Form -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h3>Tambah Barang Baru</h3>
-                    </div>
-                    <div class="card-body">
-                        <form method="POST">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label class="form-label">Nama Barang</label>
-                                        <input type="text" name="nama_barang" class="form-control" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label class="form-label">Kategori</label>
-                                        <input type="text" name="kategori" class="form-control" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label class="form-label">Stok Total</label>
-                                        <input type="number" name="stok_total" class="form-control" min="0" required>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label class="form-label">Kondisi</label>
-                                        <select name="kondisi" class="form-control" required>
-                                            <option value="baik">Baik</option>
-                                            <option value="rusak ringan">Rusak Ringan</option>
-                                            <option value="rusak berat">Rusak Berat</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label class="form-label">Lokasi</label>
-                                        <input type="text" name="lokasi" class="form-control" required>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-group">
-                                        <label class="form-label">Deskripsi</label>
-                                        <textarea name="deskripsi" class="form-control" rows="3"></textarea>
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Tambah Barang</button>
-                        </form>
-                    </div>
-                </div>
-                
-                <!-- Inventory List -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Daftar Inventaris</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table>
-                                <thead>
+                    <!-- Inventory List -->
+                    <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+                        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Inventory List</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400">
                                     <tr>
-                                        <th>Nama Barang</th>
-                                        <th>Kategori</th>
-                                        <th>Stok Total</th>
-                                        <th>Stok Tersedia</th>
-                                        <th>Kondisi</th>
-                                        <th>Lokasi</th>
-                                        <th>Aksi</th>
+                                        <th class="px-6 py-4 font-semibold">Item Name</th>
+                                        <th class="px-6 py-4 font-semibold">Category</th>
+                                        <th class="px-6 py-4 font-semibold">Stock (Total/Avail)</th>
+                                        <th class="px-6 py-4 font-semibold">Condition</th>
+                                        <th class="px-6 py-4 font-semibold">Location</th>
+                                        <th class="px-6 py-4 font-semibold text-right">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                     <?php foreach ($items as $item): ?>
-                                        <tr>
-                                            <td><?= htmlspecialchars($item['nama_barang']) ?></td>
-                                            <td><?= htmlspecialchars($item['kategori']) ?></td>
-                                            <td><?= $item['stok_total'] ?></td>
-                                            <td><?= $item['stok_tersedia'] ?></td>
-                                            <td>
-                                                <span class="badge <?= $item['kondisi'] === 'baik' ? 'badge-success' : 'badge-warning' ?>">
-                                                    <?= ucfirst($item['kondisi']) ?>
-                                                </span>
-                                            </td>
-                                            <td><?= htmlspecialchars($item['lokasi']) ?></td>
-                                            <td>
-                                                <a href="?action=delete&id=<?= $item['id'] ?>" 
-                                                   class="btn btn-danger btn-sm"
-                                                   onclick="return confirm('Yakin ingin menghapus?')">Hapus</a>
-                                            </td>
-                                        </tr>
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($item['nama_barang']) ?></td>
+                                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= htmlspecialchars($item['kategori']) ?></td>
+                                        <td class="px-6 py-4 text-sm">
+                                            <span class="font-bold text-gray-900 dark:text-gray-200"><?= $item['stok_total'] ?></span>
+                                            <span class="text-gray-400 mx-1">/</span>
+                                            <span class="<?= $item['stok_tersedia'] > 0 ? 'text-green-600' : 'text-red-500' ?>"><?= $item['stok_tersedia'] ?></span>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <span class="px-2 py-1 rounded-lg text-xs font-semibold <?= $item['kondisi'] === 'baik' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' ?>">
+                                                <?= ucfirst($item['kondisi']) ?>
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= htmlspecialchars($item['lokasi']) ?></td>
+                                        <td class="px-6 py-4 text-right">
+                                            <a href="?action=delete&id=<?= $item['id'] ?>" onclick="return confirm('Delete this item?')" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-            </div>
-        </main>
+            </main>
+        </div>
     </div>
     
-    <?php include '../includes/chatbot-widget.php'; ?>
+    <!-- Initialize Lucide -->
+    <script>lucide.createIcons();</script>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <?php include '../includes/chatbot-widget.php'; ?>
     <script src="../assets/js/chatbot.js"></script>
 </body>
 </html>

@@ -217,4 +217,34 @@ class Inventory
             ];
         }
     }
+    /**
+     * Count all items
+     */
+    public function countAll()
+    {
+        $stmt = $this->pdo->query("SELECT COUNT(*) FROM inventaris");
+        return $stmt->fetchColumn();
+    }
+
+    /**
+     * Count available items (stock > 0)
+     */
+    public function countAvailable()
+    {
+        $stmt = $this->pdo->query("SELECT SUM(stok_tersedia) FROM inventaris");
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * Get all unique categories
+     */
+    public function getCategories()
+    {
+        try {
+            $stmt = $this->pdo->query("SELECT DISTINCT kategori FROM inventaris WHERE kategori IS NOT NULL AND kategori != '' ORDER BY kategori ASC");
+            return $stmt->fetchAll(\PDO::FETCH_COLUMN);
+        } catch (\PDOException $e) {
+            return [];
+        }
+    }
 }

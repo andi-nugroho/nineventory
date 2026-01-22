@@ -287,4 +287,43 @@ class Loan
             ];
         }
     }
+    /**
+     * Count active loans (approved)
+     */
+    public function countActive()
+    {
+        $stmt = $this->pdo->query("SELECT COUNT(*) FROM peminjaman WHERE status = 'approved'");
+        return $stmt->fetchColumn();
+    }
+
+    /**
+     * Count pending loans
+     */
+    public function countPending()
+    {
+        $stmt = $this->pdo->query("SELECT COUNT(*) FROM peminjaman WHERE status = 'pending'");
+        return $stmt->fetchColumn();
+    }
+
+    /**
+     * Get recent loans
+     */
+    public function getRecent($limit = 5)
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                "SELECT p.*, u.username, i.nama_barang 
+                 FROM peminjaman p
+                 JOIN users u ON p.user_id = u.id
+                 JOIN inventaris i ON p.inventaris_id = i.id
+                 ORDER BY p.created_at DESC 
+                 LIMIT ?"
+            );
+            $stmt->bindValue(1, $limit, \PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (\PDOException $e) {
+            return [];
+        }
+    }
 }

@@ -10,6 +10,7 @@ $auth->requireAdmin();
 
 $loan = new Loan($pdo);
 $currentUser = $auth->getCurrentUser();
+$isAdmin = $auth->isAdmin();
 
 $message = '';
 $error = '';
@@ -58,280 +59,301 @@ $allLoans = $loan->getAll();
 $pendingLoans = $loan->getPending();
 ?>
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Persetujuan Peminjaman - NINEVENTORY</title>
+    <title>Loan Approvals - NINEVENTORY</title>
     <link rel="icon" href="../favicon.ico" type="image/x-icon">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../assets/css/dashboard.css">
-    <link rel="stylesheet" href="../assets/css/chatbot.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['DM Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#FF6626', // Orange
+                        secondary: '#1E293B', // Slate 800
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
-<body>
-    <div class="dashboard-wrapper">
-        <aside class="sidebar">
-            <div class="sidebar-brand">
-                <img src="../assets/images/logo.svg" alt="NINEVENTORY">
-                <h3>NINEVENTORY</h3>
-            </div>
-            
-            <nav class="sidebar-menu">
-                <div class="menu-section-title">Main Menu</div>
-                <a href="../dashboard.php" class="menu-item">
-                    <span class="menu-item-icon">📊</span>
-                    <span>Dashboard</span>
-                </a>
-                
-                <div class="menu-section-title">Admin</div>
-                <a href="inventory.php" class="menu-item">
-                    <span class="menu-item-icon">📦</span>
-                    <span>Kelola Inventaris</span>
-                </a>
-                <a href="loans.php" class="menu-item active">
-                    <span class="menu-item-icon">📋</span>
-                    <span>Persetujuan Peminjaman</span>
-                </a>
-                
-                <div class="menu-section-title">Account</div>
-                <a href="../logout.php" class="menu-item">
-                    <span class="menu-item-icon">🚪</span>
-                    <span>Logout</span>
-                </a>
-            </nav>
-        </aside>
+<body class="bg-gray-50 dark:bg-gray-900 font-sans text-slate-800 dark:text-white transition-colors duration-300"
+      x-data="{ 
+          darkMode: localStorage.getItem('theme') === 'dark',
+          modalOpen: false,
+          modalData: {
+              id: null,
+              item: '',
+              user: '',
+              date: '',
+              minReturnDate: ''
+          },
+          openApprovalModal(loan) {
+              this.modalData.id = loan.id;
+              this.modalData.item = loan.nama_barang;
+              this.modalData.user = loan.username;
+              this.modalData.date = loan.tanggal_pinjam;
+              
+              // Set default return date to 7 days from now
+              let date = new Date(loan.tanggal_pinjam);
+              date.setDate(date.getDate() + 7);
+              this.modalData.defaultReturn = date.toISOString().split('T')[0];
+              
+              // Min date is tomorrow
+              let minDate = new Date(loan.tanggal_pinjam);
+              minDate.setDate(minDate.getDate() + 1);
+              this.modalData.minReturnDate = minDate.toISOString().split('T')[0];
+              
+              this.modalOpen = true;
+          },
+          toggleTheme() {
+              this.darkMode = !this.darkMode;
+              localStorage.setItem('theme', this.darkMode ? 'dark' : 'light');
+              if (this.darkMode) {
+                  document.documentElement.classList.add('dark');
+              } else {
+                  document.documentElement.classList.remove('dark');
+              }
+          }
+      }"
+      x-init="$watch('darkMode', val => val ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark')); if(darkMode) document.documentElement.classList.add('dark');">
+    
+    <div class="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
         
-        <main class="main-content">
-            <div class="topbar">
-                <div class="topbar-title">
-                    <h1>Persetujuan Peminjaman</h1>
-                </div>
-                <div class="topbar-actions">
-                    <div class="user-profile">
-                        <div class="user-avatar"><?= strtoupper(substr($currentUser['username'], 0, 1)) ?></div>
-                        <div class="user-info">
-                            <h4><?= htmlspecialchars($currentUser['username']) ?></h4>
-                            <p>Admin</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <!-- Animated Background Gradient -->
+        <div class="fixed inset-0 -z-10 bg-gray-50 dark:bg-gray-950">
+            <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-orange-500/10 blur-[100px] animate-pulse"></div>
+            <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-red-500/10 blur-[100px] animate-pulse"></div>
+        </div>
+
+        <?php 
+        $activePage = 'loans';
+        $pathPrefix = '../';
+        include '../includes/sidebar.php'; 
+        ?>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
             
-            <div class="content-area">
-                <?php if ($message): ?>
-                    <div class="alert alert-success"><?= htmlspecialchars($message) ?></div>
-                <?php endif; ?>
-                
-                <?php if ($error): ?>
-                    <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
-                <?php endif; ?>
-                
-                <!-- Pending Approvals -->
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h3>Pengajuan Pending (<?= count($pendingLoans) ?>)</h3>
-                    </div>
-                    <div class="card-body">
+            <?php 
+            $pageTitle = 'Approvals';
+            include '../includes/header.php'; 
+            ?>
+
+            <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth hide-scrollbar">
+                <div class="max-w-7xl mx-auto space-y-8">
+
+                    <?php if ($message): ?>
+                        <div class="p-4 rounded-2xl bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 flex items-center gap-3">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i> <?= htmlspecialchars($message) ?>
+                        </div>
+                    <?php endif; ?>
+                    
+                    <?php if ($error): ?>
+                        <div class="p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 flex items-center gap-3">
+                            <i data-lucide="alert-circle" class="w-5 h-5"></i> <?= htmlspecialchars($error) ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <!-- Pending Approvals -->
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                             Pending Requests <span class="bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400 px-2 py-0.5 rounded-lg text-xs"><?= count($pendingLoans) ?></span>
+                        </h3>
+                        
                         <?php if (empty($pendingLoans)): ?>
-                            <p class="text-muted">Tidak ada pengajuan pending.</p>
+                            <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 border border-gray-100 dark:border-gray-700 text-center text-gray-500">
+                                <i data-lucide="check-circle" class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600"></i>
+                                <p>No pending requests.</p>
+                            </div>
                         <?php else: ?>
-                            <div class="table-responsive">
-                                <table>
-                                    <thead>
-                                        <tr>
-                                            <th>User</th>
-                                            <th>Barang</th>
-                                            <th>Jumlah</th>
-                                            <th>Stok Tersedia</th>
-                                            <th>Tanggal Pinjam</th>
-                                            <th>Keterangan</th>
-                                            <th>Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php foreach ($pendingLoans as $item): ?>
-                                            <tr>
-                                                <td><?= htmlspecialchars($item['username']) ?></td>
-                                                <td><?= htmlspecialchars($item['nama_barang']) ?></td>
-                                                <td><?= $item['jumlah'] ?></td>
-                                                <td><?= $item['stok_tersedia'] ?></td>
-                                                <td><?= date('d/m/Y', strtotime($item['tanggal_pinjam'])) ?></td>
-                                                <td><?= htmlspecialchars($item['keterangan'] ?? '-') ?></td>
-                                                <td>
-                                                    <button type="button" class="btn btn-success btn-sm" 
-                                                            data-bs-toggle="modal" 
-                                                            data-bs-target="#approveModal"
-                                                            data-loan-id="<?= $item['id'] ?>"
-                                                            data-item-name="<?= htmlspecialchars($item['nama_barang']) ?>"
-                                                            data-user-name="<?= htmlspecialchars($item['username']) ?>"
-                                                            data-tanggal-pinjam="<?= $item['tanggal_pinjam'] ?>">
-                                                        Setujui
-                                                    </button>
-                                                    <a href="?action=reject&id=<?= $item['id'] ?>" 
-                                                       class="btn btn-danger btn-sm"
-                                                       onclick="return confirm('Tolak peminjaman ini?')">Tolak</a>
-                                                </td>
-                                            </tr>
-                                        <?php endforeach; ?>
-                                    </tbody>
-                                </table>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <?php foreach ($pendingLoans as $item): ?>
+                                <div class="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm flex flex-col">
+                                    <div class="flex items-start justify-between mb-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-600 dark:text-gray-300">
+                                                <?= strtoupper(substr($item['username'], 0, 1)) ?>
+                                            </div>
+                                            <div>
+                                                <div class="font-bold text-gray-900 dark:text-white"><?= htmlspecialchars($item['username']) ?></div>
+                                                <div class="text-xs text-gray-500"><?= date('M d, Y', strtotime($item['tanggal_pinjam'])) ?></div>
+                                            </div>
+                                        </div>
+                                        <span class="px-2 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-xs font-semibold rounded-lg">Pending</span>
+                                    </div>
+                                    
+                                    <div class="space-y-2 mb-6 flex-1">
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-gray-500 dark:text-gray-400">Item:</span>
+                                            <span class="font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($item['nama_barang']) ?></span>
+                                        </div>
+                                        <div class="flex justify-between text-sm">
+                                            <span class="text-gray-500 dark:text-gray-400">Qty:</span>
+                                            <span class="font-medium text-gray-900 dark:text-white"><?= $item['jumlah'] ?> (Avail: <?= $item['stok_tersedia'] ?>)</span>
+                                        </div>
+                                        <?php if($item['keterangan']): ?>
+                                        <div class="bg-gray-50 dark:bg-gray-750 p-3 rounded-xl text-sm text-gray-600 dark:text-gray-300 mt-2">
+                                            "<?= htmlspecialchars($item['keterangan']) ?>"
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    
+                                    <div class="flex gap-2 mt-auto">
+                                        <button @click='openApprovalModal(<?= json_encode($item) ?>)' class="flex-1 py-2 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 transition">Approve</button>
+                                        <a href="?action=reject&id=<?= $item['id'] ?>" onclick="return confirm('Reject this request?')" class="px-4 py-2 bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400 rounded-xl font-medium hover:bg-red-200 dark:hover:bg-red-900/40 transition">Reject</a>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
                     </div>
-                </div>
-                
-                <!-- All Loans -->
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Semua Peminjaman</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table>
-                                <thead>
+
+                    <!-- All Loans Table -->
+                    <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
+                        <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">All Loans History</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400">
                                     <tr>
-                                        <th>User</th>
-                                        <th>Barang</th>
-                                        <th>Jumlah</th>
-                                        <th>Tanggal Pinjam</th>
-                                        <th>Tgl Kembali Rencana</th>
-                                        <th>Tgl Kembali Aktual</th>
-                                        <th>Status</th>
-                                        <th>Aksi</th>
+                                        <th class="px-6 py-4 font-semibold">User</th>
+                                        <th class="px-6 py-4 font-semibold">Item</th>
+                                        <th class="px-6 py-4 font-semibold">Borrowed</th>
+                                        <th class="px-6 py-4 font-semibold">Due Date</th>
+                                        <th class="px-6 py-4 font-semibold">Returned</th>
+                                        <th class="px-6 py-4 font-semibold">Status</th>
+                                        <th class="px-6 py-4 font-semibold text-right">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                     <?php foreach ($allLoans as $item): ?>
-                                        <tr>
-                                            <td><?= htmlspecialchars($item['username']) ?></td>
-                                            <td><?= htmlspecialchars($item['nama_barang']) ?></td>
-                                            <td><?= $item['jumlah'] ?></td>
-                                            <td><?= date('d/m/Y', strtotime($item['tanggal_pinjam'])) ?></td>
-                                            <td>
-                                                <?php if ($item['tanggal_kembali_rencana']): ?>
-                                                    <span class="badge badge-primary">
-                                                        <?= date('d/m/Y', strtotime($item['tanggal_kembali_rencana'])) ?>
-                                                    </span>
-                                                <?php else: ?>
-                                                    -
-                                                <?php endif; ?>
-                                            </td>
-                                            <td><?= $item['tanggal_kembali'] ? date('d/m/Y', strtotime($item['tanggal_kembali'])) : '-' ?></td>
-                                            <td>
-                                                <?php
-                                                $badgeClass = match($item['status']) {
-                                                    'approved' => 'badge-success',
-                                                    'pending' => 'badge-warning',
-                                                    'rejected' => 'badge-danger',
-                                                    'returned' => 'badge-primary',
-                                                    default => 'badge-primary'
-                                                };
-                                                ?>
-                                                <span class="badge <?= $badgeClass ?>">
-                                                    <?= ucfirst($item['status']) ?>
+                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($item['username']) ?></td>
+                                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                            <?= htmlspecialchars($item['nama_barang']) ?>
+                                            <span class="text-xs text-gray-400 block">Qty: <?= $item['jumlah'] ?></span>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= date('M d, Y', strtotime($item['tanggal_pinjam'])) ?></td>
+                                        <td class="px-6 py-4">
+                                            <?php if ($item['tanggal_kembali_rencana']): ?>
+                                                <span class="px-2 py-1 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 rounded-lg text-xs font-medium">
+                                                    <?= date('M d', strtotime($item['tanggal_kembali_rencana'])) ?>
                                                 </span>
-                                            </td>
-                                            <td>
-                                                <?php if ($item['status'] === 'approved'): ?>
-                                                    <a href="?action=return&id=<?= $item['id'] ?>" 
-                                                       class="btn btn-primary btn-sm"
-                                                       onclick="return confirm('Tandai sebagai dikembalikan?')">Kembalikan</a>
-                                                <?php else: ?>
-                                                    -
-                                                <?php endif; ?>
-                                            </td>
-                                        </tr>
+                                            <?php else: ?>
+                                                <span class="text-gray-300">-</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                            <?= $item['tanggal_kembali'] ? date('M d, Y', strtotime($item['tanggal_kembali'])) : '-' ?>
+                                        </td>
+                                        <td class="px-6 py-4">
+                                            <?php
+                                            $statusColor = match($item['status']) {
+                                                'approved' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+                                                'pending' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+                                                'rejected' => 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
+                                                'returned' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+                                                default => 'bg-gray-100 text-gray-700'
+                                            };
+                                            ?>
+                                            <span class="px-2 py-1 rounded-lg text-xs font-semibold <?= $statusColor ?>">
+                                                <?= ucfirst($item['status']) ?>
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 text-right">
+                                            <?php if ($item['status'] === 'approved'): ?>
+                                                <a href="?action=return&id=<?= $item['id'] ?>" onclick="return confirm('Mark as returned?')" class="px-3 py-1.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg text-xs font-medium hover:opacity-90 transition">Return</a>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
+            </main>
+
+            <!-- Approval Modal -->
+            <div x-show="modalOpen" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
+                <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                    <div x-show="modalOpen" x-transition.opacity class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" @click="modalOpen = false"></div>
+                    <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+                    
+                    <div x-show="modalOpen" x-transition.scale class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
+                        <form method="POST">
+                            <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4" id="modal-title">Approve Loan</h3>
+                                
+                                <input type="hidden" name="loan_id" x-model="modalData.id">
+                                <input type="hidden" name="approve_loan" value="1">
+                                
+                                <div class="space-y-3">
+                                    <div class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
+                                        <span class="text-gray-500 dark:text-gray-400">User</span>
+                                        <span class="font-medium text-gray-900 dark:text-white" x-text="modalData.user"></span>
+                                    </div>
+                                    <div class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
+                                        <span class="text-gray-500 dark:text-gray-400">Item</span>
+                                        <span class="font-medium text-gray-900 dark:text-white" x-text="modalData.item"></span>
+                                    </div>
+                                    <div class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
+                                        <span class="text-gray-500 dark:text-gray-400">Borrowed On</span>
+                                        <span class="font-medium text-gray-900 dark:text-white" x-text="modalData.date"></span>
+                                    </div>
+                                    
+                                    <div class="mt-4">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Return Date Plan <span class="text-red-500">*</span>
+                                        </label>
+                                        <input type="date" name="tanggal_kembali_rencana" required 
+                                               :min="modalData.minReturnDate" 
+                                               x-model="modalData.defaultReturn"
+                                               class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 outline-none">
+                                        <p class="text-xs text-gray-500 mt-1">Specify when this item must be returned.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 dark:bg-gray-700/30 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                <button type="submit" class="w-full inline-flex justify-center rounded-xl border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none sm:ml-3 sm:w-auto sm:text-sm">
+                                    Approve Loan
+                                </button>
+                                <button type="button" @click="modalOpen = false" class="mt-3 w-full inline-flex justify-center rounded-xl border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                    Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
-        </main>
-    </div>
-    
-    <!-- Approval Modal -->
-    <div class="modal fade" id="approveModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <form method="POST">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Setujui Peminjaman</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <input type="hidden" name="loan_id" id="modalLoanId">
-                        <input type="hidden" name="approve_loan" value="1">
-                        
-                        <div class="mb-3">
-                            <label class="form-label"><strong>User:</strong></label>
-                            <p id="modalUserName" class="mb-0"></p>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label"><strong>Barang:</strong></label>
-                            <p id="modalItemName" class="mb-0"></p>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label"><strong>Tanggal Pinjam:</strong></label>
-                            <p id="modalTanggalPinjam" class="mb-0"></p>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="tanggalKembaliRencana" class="form-label">
-                                <strong>Tanggal Pengembalian Rencana: <span class="text-danger">*</span></strong>
-                            </label>
-                            <input type="date" 
-                                   class="form-control" 
-                                   id="tanggalKembaliRencana" 
-                                   name="tanggal_kembali_rencana" 
-                                   required>
-                            <small class="text-muted">Tentukan kapan barang harus dikembalikan</small>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-success">Setujui Peminjaman</button>
-                    </div>
-                </form>
-            </div>
+
         </div>
     </div>
     
-    <?php include '../includes/chatbot-widget.php'; ?>
+    <!-- Initialize Lucide -->
+    <script>lucide.createIcons();</script>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <?php include '../includes/chatbot-widget.php'; ?>
     <script src="../assets/js/chatbot.js"></script>
-    <script>
-        // Populate approval modal with loan data
-        const approveModal = document.getElementById('approveModal');
-        approveModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            
-            const loanId = button.getAttribute('data-loan-id');
-            const itemName = button.getAttribute('data-item-name');
-            const userName = button.getAttribute('data-user-name');
-            const tanggalPinjam = button.getAttribute('data-tanggal-pinjam');
-            
-            document.getElementById('modalLoanId').value = loanId;
-            document.getElementById('modalItemName').textContent = itemName;
-            document.getElementById('modalUserName').textContent = userName;
-            document.getElementById('modalTanggalPinjam').textContent = new Date(tanggalPinjam).toLocaleDateString('id-ID');
-            
-            // Set minimum date to tomorrow
-            const tomorrow = new Date(tanggalPinjam);
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            const minDate = tomorrow.toISOString().split('T')[0];
-            document.getElementById('tanggalKembaliRencana').setAttribute('min', minDate);
-            
-            // Set default to 7 days from borrow date
-            const defaultReturn = new Date(tanggalPinjam);
-            defaultReturn.setDate(defaultReturn.getDate() + 7);
-            document.getElementById('tanggalKembaliRencana').value = defaultReturn.toISOString().split('T')[0];
-        });
-    </script>
 </body>
 </html>

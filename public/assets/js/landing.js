@@ -1,50 +1,6 @@
-// NINEVENTORY Landing Page - JavaScript
+// NINEVENTORY - Landing Page JavaScript
 
-// Animation state
-let isMounted = false;
-
-// Pillar heights for hero section (symmetric pattern)
-const pillars = [92, 84, 78, 70, 62, 54, 46, 34, 18, 34, 46, 54, 62, 70, 78, 84, 92];
-
-// Initialize animations on page load
-document.addEventListener('DOMContentLoaded', function () {
-    // Trigger mount animations after short delay
-    setTimeout(() => {
-        isMounted = true;
-        triggerAnimations();
-    }, 100);
-});
-
-// Trigger all animations
-function triggerAnimations() {
-    // Fade in hero content
-    const heroElements = document.querySelectorAll('.hero-animate');
-    heroElements.forEach((el, index) => {
-        setTimeout(() => {
-            el.classList.add('animate-fadeInUp');
-            el.style.opacity = '1';
-        }, index * 200);
-    });
-
-    // Animate pillars
-    animatePillars();
-}
-
-// Animate hero pillars
-function animatePillars() {
-    const pillarElements = document.querySelectorAll('.pillar');
-    pillarElements.forEach((pillar, index) => {
-        const targetHeight = pillars[index];
-        const centerIndex = Math.floor(pillars.length / 2);
-        const delay = Math.abs(index - centerIndex) * 60;
-
-        setTimeout(() => {
-            pillar.style.height = `${targetHeight}%`;
-        }, delay);
-    });
-}
-
-// Smooth scroll for anchor links
+// Smooth Scroll for Navigation Links
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function (e) {
         e.preventDefault();
@@ -58,7 +14,31 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// Add scroll reveal for features
+// Navbar Scroll Effect - Transparent to Solid
+const navbar = document.getElementById('navbar');
+const navbarInner = document.getElementById('navbarInner');
+
+function updateNavbar() {
+    const scrolled = window.scrollY;
+
+    if (scrolled > 50) {
+        // Scrolled state - solid background
+        navbarInner.classList.remove('border-white/0', 'bg-black/0', 'backdrop-blur-none', 'shadow-none');
+        navbarInner.classList.add('border-white/10', 'bg-black/80', 'backdrop-blur-xl', 'shadow-lg');
+    } else {
+        // Top of page - transparent
+        navbarInner.classList.remove('border-white/10', 'bg-black/80', 'backdrop-blur-xl', 'shadow-lg');
+        navbarInner.classList.add('border-white/0', 'bg-black/0', 'backdrop-blur-none', 'shadow-none');
+    }
+}
+
+// Listen for scroll events
+window.addEventListener('scroll', updateNavbar);
+
+// Initialize on page load
+updateNavbar();
+
+// Fade-in animations on scroll
 const observerOptions = {
     threshold: 0.1,
     rootMargin: '0px 0px -100px 0px'
@@ -67,33 +47,23 @@ const observerOptions = {
 const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
-            entry.target.classList.add('animate-fadeInUp');
             entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
         }
     });
 }, observerOptions);
 
-// Observe feature cards
-document.addEventListener('DOMContentLoaded', () => {
-    const features = document.querySelectorAll('.feature-card');
-    features.forEach(feature => {
-        observer.observe(feature);
-    });
+// Observe all sections
+document.querySelectorAll('section').forEach(section => {
+    section.style.opacity = '0';
+    section.style.transform = 'translateY(20px)';
+    section.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+    observer.observe(section);
 });
 
-// Navbar scroll behavior - Always visible with enhanced styling on scroll
-let lastScrollTop = 0;
-const navbar = document.querySelector('header');
-
-window.addEventListener('scroll', () => {
-    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-    // Always keep navbar visible, just enhance styling when scrolled
-    if (scrollTop > 50) {
-        navbar.classList.add('scrolled');
-    } else {
-        navbar.classList.remove('scrolled');
-    }
-
-    lastScrollTop = scrollTop;
-}, { passive: true });
+// Hero section should be visible immediately
+const heroSection = document.getElementById('hero');
+if (heroSection) {
+    heroSection.style.opacity = '1';
+    heroSection.style.transform = 'translateY(0)';
+}

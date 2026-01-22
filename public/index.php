@@ -19,27 +19,29 @@
 </head>
 <body class="bg-black text-white overflow-x-hidden">
     
-    <!-- Navigation - Floating Centered (Independent) -->
-    <header class="fixed top-6 left-1/2 -translate-x-1/2 z-[9999] w-full max-w-5xl px-6">
-        <div class="mx-auto flex items-center justify-between rounded-full border border-white/10 bg-black/50 backdrop-blur-xl px-6 py-3 shadow-lg">
-            <div class="flex items-center gap-3">
-                <!-- Vault Logo -->
-                <img src="assets/images/logo.svg" alt="Vault" class="h-6 w-auto">
+    <!-- Navigation - Transparent initially, solid on scroll -->
+    <header id="navbar" class="fixed top-0 left-0 right-0 z-[9999] transition-all duration-500 ease-in-out">
+        <div class="mx-auto max-w-7xl px-6 py-4">
+            <div class="mx-auto flex items-center justify-between rounded-full border border-white/0 bg-black/0 backdrop-blur-none px-6 py-3 shadow-none transition-all duration-500 ease-in-out" id="navbarInner">
+                <div class="flex items-center gap-3">
+                    <!-- Logo -->
+                    <img src="assets/images/logo.svg" alt="NINEVENTORY" class="h-6 w-auto">
+                </div>
+
+                <nav class="hidden items-center gap-8 text-sm/6 text-white/80 md:flex">
+                    <a class="hover:text-white transition-colors duration-300" href="#features">Features</a>
+                    <a class="hover:text-white transition-colors duration-300" href="#customers">Customers</a>
+                    <a class="hover:text-white transition-colors duration-300" href="#about">About</a>
+                    <a class="hover:text-white transition-colors duration-300" href="#contact">Contact</a>
+                </nav>
+
+                <div class="hidden items-center gap-3 md:flex">
+                    <a href="login.php" class="rounded-full px-4 py-2 text-sm text-white/80 hover:text-white transition-colors duration-300">Sign in</a>
+                    <a href="register.php" class="rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-5 py-2 text-sm font-medium text-white shadow-lg transition-all duration-300 hover:shadow-red-500/50 hover:scale-105">Get Started</a>
+                </div>
+
+                <button class="md:hidden rounded-full bg-white/10 px-3 py-2 text-sm hover:bg-white/20 transition-colors duration-300">Menu</button>
             </div>
-
-            <nav class="hidden items-center gap-8 text-sm/6 text-white/80 md:flex">
-                <a class="hover:text-white transition" href="#features">Features</a>
-                <a class="hover:text-white transition" href="#customers">Customers</a>
-                <a class="hover:text-white transition" href="#about">About</a>
-                <a class="hover:text-white transition" href="#contact">Contact</a>
-            </nav>
-
-            <div class="hidden items-center gap-3 md:flex">
-                <a href="login.php" class="rounded-full px-4 py-2 text-sm text-white/80 hover:text-white transition">Sign in</a>
-                <a href="register.php" class="rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-5 py-2 text-sm font-medium text-white shadow-lg transition hover:shadow-red-500/50">Get Started</a>
-            </div>
-
-            <button class="md:hidden rounded-full bg-white/10 px-3 py-2 text-sm">Menu</button>
         </div>
     </header>
     
@@ -53,7 +55,7 @@
         <div aria-hidden class="pointer-events-none absolute inset-0 -z-10 grid-overlay"></div>
 
         <!-- Hero Content -->
-        <div class="relative z-10 mx-auto grid w-full max-w-5xl place-items-center px-6 py-16 md:py-24 lg:py-28">
+        <div class="relative z-10 mx-auto grid w-full max-w-5xl place-items-center px-6 pt-32 pb-16 md:pt-40 md:pb-24 lg:pt-44 lg:pb-28">
             <div class="mx-auto text-center fade-in">
                 <span class="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-[11px] uppercase tracking-wider text-white/70 ring-1 ring-white/10 backdrop-blur">
                     <span class="h-1.5 w-1.5 rounded-full bg-red-500 subtle-pulse"></span> Smart Inventory
