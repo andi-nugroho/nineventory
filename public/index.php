@@ -6,7 +6,7 @@
     <title>NINEVENTORY - Smart Inventory Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts - DM Sans -->
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -19,12 +19,12 @@
 </head>
 <body class="bg-black text-white overflow-x-hidden">
     
-    <!-- Navigation - Transparent initially, solid on scroll -->
+    
     <header id="navbar" class="fixed top-0 left-0 right-0 z-[9999] transition-all duration-500 ease-in-out">
         <div class="mx-auto max-w-7xl px-6 py-4">
             <div class="mx-auto flex items-center justify-between rounded-full border border-white/0 bg-black/0 backdrop-blur-none px-6 py-3 shadow-none transition-all duration-500 ease-in-out" id="navbarInner">
                 <div class="flex items-center gap-3">
-                    <!-- Logo -->
+                    
                     <img src="assets/images/logo.svg" alt="NINEVENTORY" class="h-6 w-auto">
                 </div>
 
@@ -45,16 +45,16 @@
         </div>
     </header>
     
-    <!-- Hero Section -->
+    
     <section id="hero" class="relative isolate min-h-screen overflow-hidden bg-black text-white">
-        <!-- Background Gradients -->
+        
         <div aria-hidden class="absolute inset-0 -z-30 animated-gradient"></div>
         <div aria-hidden class="absolute inset-0 -z-20 bg-[radial-gradient(140%_120%_at_50%_0%,transparent_60%,rgba(0,0,0,0.85))]"></div>
         
-        <!-- Grid Overlay -->
+        
         <div aria-hidden class="pointer-events-none absolute inset-0 -z-10 grid-overlay"></div>
 
-        <!-- Hero Content -->
+        
         <div class="relative z-10 mx-auto grid w-full max-w-5xl place-items-center px-6 pt-32 pb-16 md:pt-40 md:pb-24 lg:pt-44 lg:pb-28">
             <div class="mx-auto text-center fade-in">
                 <span class="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-[11px] uppercase tracking-wider text-white/70 ring-1 ring-white/10 backdrop-blur">
@@ -80,7 +80,7 @@
             </div>
         </div>
 
-        <!-- Animated Pillars -->
+        
         <div class="absolute bottom-0 left-0 right-0 z-0 flex items-end justify-center gap-1 px-4 pb-0 h-32 md:h-40">
             <div class="pillar-1 w-2 md:w-3 bg-gradient-to-t from-red-500/40 to-transparent rounded-t"></div>
             <div class="pillar-2 w-2 md:w-3 bg-gradient-to-t from-orange-500/40 to-transparent rounded-t"></div>
@@ -102,7 +102,7 @@
         </div>
     </section>
 
-    <!-- Features Section -->
+    
     <section id="features" class="py-16 md:py-32 bg-black">
         <div class="mx-auto max-w-5xl space-y-12 px-6">
             <div class="relative z-10 grid items-center gap-4 md:grid-cols-2 md:gap-12">
@@ -110,7 +110,7 @@
                 <p class="max-w-sm sm:ml-auto text-white/70">Empower your team with workflows that adapt to your needs, whether you prefer real-time tracking or AI-powered interface.</p>
             </div>
             
-            <!-- Feature Image Showcase -->
+            
             <div class="relative rounded-3xl p-3 md:-mx-8 lg:col-span-3 bg-gradient-to-br from-red-500/10 to-orange-500/10 border border-red-500/20">
                 <div class="aspect-[88/36] relative bg-gradient-to-br from-gray-900 to-black rounded-2xl overflow-hidden">
                     <div class="absolute inset-0 flex items-center justify-center">
@@ -125,7 +125,7 @@
                 </div>
             </div>
             
-            <!-- Feature Cards -->
+            
             <div class="relative mx-auto grid grid-cols-2 gap-x-3 gap-y-6 sm:gap-8 lg:grid-cols-4">
                 <div class="space-y-3 p-4 rounded-xl bg-gradient-to-br from-red-500/5 to-transparent border border-red-500/10 hover:border-red-500/30 transition">
                     <div class="flex items-center gap-2">
@@ -170,9 +170,9 @@
         </div>
     </section>
 
-    <!-- Customers Section -->
+    
     <section id="customers" class="relative py-16 md:py-24 bg-black overflow-hidden">
-        <!-- Background Image -->
+        
         <div class="absolute inset-0 opacity-30">
             <img src="assets/images/world.png" alt="" class="w-full h-full object-cover">
         </div>
@@ -187,9 +187,9 @@
         </div>
     </section>
 
-    <!-- About Section -->
+    
     <section id="about" class="relative py-16 md:py-24 bg-gradient-to-b from-black to-gray-900 overflow-hidden">
-        <!-- Background Image -->
+        
         <div class="absolute inset-0 opacity-20">
             <img src="assets/images/world-light.png" alt="" class="w-full h-full object-cover">
         </div>
@@ -227,16 +227,16 @@
         </div>
     </section>
 
-    <!-- Contact Section -->
+    
     <section id="contact" class="relative py-16 md:py-24 bg-black flex items-center justify-center min-h-screen overflow-hidden">
-        <!-- Background Image -->
+        
         <div class="absolute inset-0 opacity-25">
             <img src="assets/images/blob_https___thevault.png" alt="" class="w-full h-full object-cover">
         </div>
         <div class="relative mx-auto max-w-5xl w-full px-6">
-            <!-- Contact Card Container -->
+            
             <div class="relative rounded-3xl border border-white/10 bg-gradient-to-br from-gray-900/50 to-black/50 backdrop-blur-xl p-8 md:p-12">
-                <!-- Header -->
+                
                 <div class="mb-8 text-center">
                     <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Get in touch</h2>
                     <p class="text-white/70 max-w-2xl mx-auto">
@@ -244,9 +244,9 @@
                     </p>
                 </div>
 
-                <!-- Contact Info Cards -->
+                
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                    <!-- Email Card -->
+                    
                     <div class="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-red-500/10 to-transparent border border-red-500/20 hover:border-red-500/40 transition">
                         <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -259,7 +259,7 @@
                         </div>
                     </div>
 
-                    <!-- Phone Card -->
+                    
                     <div class="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-red-500/10 to-transparent border border-red-500/20 hover:border-red-500/40 transition">
                         <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -272,7 +272,7 @@
                         </div>
                     </div>
 
-                    <!-- Address Card -->
+                    
                     <div class="flex items-start gap-3 p-4 rounded-xl bg-gradient-to-br from-red-500/10 to-transparent border border-red-500/20 hover:border-red-500/40 transition md:col-span-1">
                         <div class="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center">
                             <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -287,10 +287,10 @@
                     </div>
                 </div>
 
-                <!-- Contact Form -->
+                
                 <form class="w-full space-y-6">
                     <div class="grid md:grid-cols-2 gap-6">
-                        <!-- Name Input -->
+                        
                         <div class="flex flex-col gap-2">
                             <label class="text-sm font-medium text-white/80">Name</label>
                             <input 
@@ -300,7 +300,7 @@
                             >
                         </div>
 
-                        <!-- Email Input -->
+                        
                         <div class="flex flex-col gap-2">
                             <label class="text-sm font-medium text-white/80">Email</label>
                             <input 
@@ -311,7 +311,7 @@
                         </div>
                     </div>
 
-                    <!-- Phone Input -->
+                    
                     <div class="flex flex-col gap-2">
                         <label class="text-sm font-medium text-white/80">Phone</label>
                         <input 
@@ -321,7 +321,7 @@
                         >
                     </div>
 
-                    <!-- Message Textarea -->
+                    
                     <div class="flex flex-col gap-2">
                         <label class="text-sm font-medium text-white/80">Message</label>
                         <textarea 
@@ -331,7 +331,7 @@
                         ></textarea>
                     </div>
 
-                    <!-- Submit Button -->
+                    
                     <button 
                         type="submit" 
                         class="w-full rounded-full bg-gradient-to-r from-red-500 to-orange-500 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:shadow-red-500/50 hover:scale-[1.02] active:scale-[0.98]"
@@ -344,7 +344,7 @@
     </section>
 
 
-    <!-- Footer -->
+    
     <footer class="bg-black border-t border-white/10 py-12">
         <div class="mx-auto max-w-6xl px-6">
             <div class="grid md:grid-cols-4 gap-8">
@@ -380,7 +380,7 @@
                 </div>
             </div>
             <div class="mt-12 pt-8 border-t border-white/10 text-center text-white/60 text-sm">
-                <p>&copy; 2024 NINEVENTORY. All rights reserved.</p>
+                <p>&copy; 2026 NINEVENTORY. All rights reserved.</p>
             </div>
         </div>
     </footer>
