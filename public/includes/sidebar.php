@@ -108,9 +108,7 @@ $pathPrefix = $pathPrefix ?? './';
                       x-transition:enter-start="opacity-0 translate-x-2"
                       x-transition:enter-end="opacity-100 translate-x-0"
                       class="font-semibold text-neutral-800 dark:text-neutral-100 whitespace-pre text-base tracking-tight"
-                      style="display: none;">
-                    NINEVENTORY
-                </span>
+                      style="display: none;">NINEVENTORY</span>
             </div>
 
             <!-- Links -->
@@ -119,36 +117,28 @@ $pathPrefix = $pathPrefix ?? './';
                     <i data-lucide="layout-dashboard" class="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0"></i>
                     <span x-show="open" 
                           class="text-neutral-700 dark:text-neutral-200 text-sm font-medium group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
-                          style="display: none;">
-                        Dashboard
-                    </span>
+                          style="display: none;">Dashboard</span>
                 </a>
 
                 <a href="<?= $pathPrefix ?>user/browse.php" class="flex items-center justify-start gap-3 group/sidebar p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700/50 transition-colors <?= $activePage === 'browse' ? 'bg-neutral-200 dark:bg-neutral-700' : '' ?>">
                     <i data-lucide="search" class="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0"></i>
                     <span x-show="open" 
                           class="text-neutral-700 dark:text-neutral-200 text-sm font-medium group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
-                          style="display: none;">
-                        Browse Inventory
-                    </span>
+                          style="display: none;">Browse Inventory</span>
                 </a>
 
                 <a href="<?= $pathPrefix ?>user/request.php" class="flex items-center justify-start gap-3 group/sidebar p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700/50 transition-colors <?= $activePage === 'request' ? 'bg-neutral-200 dark:bg-neutral-700' : '' ?>">
                     <i data-lucide="plus-circle" class="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0"></i>
                     <span x-show="open" 
                           class="text-neutral-700 dark:text-neutral-200 text-sm font-medium group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
-                          style="display: none;">
-                        New Request
-                    </span>
+                          style="display: none;">New Request</span>
                 </a>
 
                 <a href="<?= $pathPrefix ?>user/history.php" class="flex items-center justify-start gap-3 group/sidebar p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700/50 transition-colors <?= $activePage === 'history' ? 'bg-neutral-200 dark:bg-neutral-700' : '' ?>">
                     <i data-lucide="history" class="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0"></i>
                     <span x-show="open" 
                           class="text-neutral-700 dark:text-neutral-200 text-sm font-medium group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
-                          style="display: none;">
-                        History
-                    </span>
+                          style="display: none;">History</span>
                 </a>
 
                 <?php if (isset($isAdmin) && $isAdmin): ?>
@@ -158,18 +148,14 @@ $pathPrefix = $pathPrefix ?? './';
                         <i data-lucide="package" class="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0"></i>
                         <span x-show="open" 
                               class="text-neutral-700 dark:text-neutral-200 text-sm font-medium group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
-                              style="display: none;">
-                            Manage Inventory
-                        </span>
+                              style="display: none;">Manage Inventory</span>
                     </a>
 
                     <a href="<?= $pathPrefix ?>admin/loans.php" class="flex items-center justify-start gap-3 group/sidebar p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700/50 transition-colors <?= $activePage === 'loans' ? 'bg-neutral-200 dark:bg-neutral-700' : '' ?>">
                         <i data-lucide="check-square" class="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0"></i>
                         <span x-show="open" 
                               class="text-neutral-700 dark:text-neutral-200 text-sm font-medium group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
-                              style="display: none;">
-                            Approvals
-                        </span>
+                              style="display: none;">Approvals</span>
                     </a>
                 <?php endif; ?>
             </div>
