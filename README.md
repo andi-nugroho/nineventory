@@ -32,8 +32,3 @@ Nineventory is a comprehensive inventory management system designed to streamlin
 - **Server**: Apache (via XAMPP)
 - **Version Control**: Git & GitHub
 - **Editor**: VS Code
-
-## Author
-
-- **GitHub**: [Andi Nugroho](https://github.com/andi-nugroho)
-- **Email**: andidelouise@gmail.com
