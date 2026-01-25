@@ -14,13 +14,13 @@ $loan = new Loan($pdo);
 $currentUser = $auth->getCurrentUser();
 $isAdmin = $auth->isAdmin();
 
-// Statistics
+
 $totalItems = $inventory->countAll();
 $availableItems = $inventory->countAvailable();
 $activeLoans = $loan->countActive();
 $pendingLoans = $loan->countPending();
 
-// Recent Activity
+
 $recentLoans = $loan->getRecent(5);
 ?>
 <!DOCTYPE html>
@@ -50,9 +50,11 @@ $recentLoans = $loan->getRecent(5);
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- Alpine.js -->
+
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Lucide Icons -->
+
+
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         [x-cloak] { display: none !important; }
@@ -61,7 +63,7 @@ $recentLoans = $loan->getRecent(5);
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 font-sans text-slate-800 dark:text-white transition-colors duration-300"
-      x-data="{ 
+      x-data="{
           darkMode: localStorage.getItem('theme') === 'dark',
           toggleTheme() {
               this.darkMode = !this.darkMode;
@@ -74,32 +76,32 @@ $recentLoans = $loan->getRecent(5);
           }
       }"
       x-init="$watch('darkMode', val => val ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark')); if(darkMode) document.documentElement.classList.add('dark');">
-    
+
     <div class="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
-        
-        <!-- Animated Background Gradient -->
+
+
         <div class="fixed inset-0 -z-10 bg-gray-50 dark:bg-gray-950">
             <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-orange-500/10 blur-[100px] animate-pulse"></div>
             <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-red-500/10 blur-[100px] animate-pulse"></div>
         </div>
 
-        <?php 
+        <?php
         $activePage = 'dashboard';
         $pathPrefix = './';
-        include 'includes/sidebar.php'; 
+        include 'includes/sidebar.php';
         ?>
 
-        <!-- Main Content -->
+
         <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
-            
-            <?php 
+
+            <?php
             $pageTitle = 'Overview';
-            include 'includes/header.php'; 
+            include 'includes/header.php';
             ?>
 
             <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth hide-scrollbar">
-                
-                <!-- Welcome Section -->
+
+
                 <div class="mb-8 relative overflow-hidden rounded-3xl bg-gradient-to-br from-orange-500 to-red-600 text-white shadow-xl shadow-orange-500/20 p-8">
                     <div class="relative z-10">
                         <div class="flex items-start justify-between">
@@ -113,12 +115,13 @@ $recentLoans = $loan->getRecent(5);
                             </div>
                         </div>
                     </div>
-                    <!-- Decorative Circles -->
+
+
                     <div class="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
                     <div class="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
                 </div>
 
-                <!-- Stats Grid -->
+
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <div class="p-6 bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow group">
                         <div class="flex items-center justify-between mb-4">
@@ -169,7 +172,8 @@ $recentLoans = $loan->getRecent(5);
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    <!-- Recent Activity -->
+
+
                     <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
                         <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
                             <h3 class="font-bold text-gray-900 dark:text-white">Recent Activity</h3>
@@ -223,7 +227,7 @@ $recentLoans = $loan->getRecent(5);
                         </div>
                     </div>
 
-                    <!-- Quick Actions -->
+
                     <div class="space-y-6">
                         <div class="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 text-white shadow-lg shadow-indigo-500/20">
                             <h3 class="text-xl font-bold mb-2">Needs Help?</h3>
@@ -258,10 +262,10 @@ $recentLoans = $loan->getRecent(5);
             </main>
         </div>
     </div>
+
     
-    <!-- Initialize Lucide -->
     <script>lucide.createIcons();</script>
-    
+
     <?php include 'includes/chatbot-widget.php'; ?>
     <script src="assets/js/chatbot.js"></script>
 </body>
