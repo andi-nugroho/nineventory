@@ -172,5 +172,18 @@ $myLoans = $loan->getByUserId($currentUser['id']);
 
     <?php include '../includes/chatbot-widget.php'; ?>
     <script src="../assets/js/chatbot.js"></script>
+    <script>
+        document.addEventListener('alpine:init', () => {
+             const urlParams = new URLSearchParams(window.location.search);
+             if (urlParams.has('loan_success')) {
+                 if (Alpine.store('cart')) {
+                     Alpine.store('cart').clear();
+                 }
+                 // Remove param from URL without refresh
+                 const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                 window.history.replaceState({path:newUrl},'',newUrl);
+             }
+        });
+    </script>
 </body>
 </html>

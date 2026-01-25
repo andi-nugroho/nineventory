@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($result['success']) {
             $message = $result['message'];
             
-             header("Location: history.php"); 
+             header("Location: history.php?loan_success=1"); 
              exit;
         } else {
             $error = $result['message'];
@@ -144,19 +144,19 @@ $selectedItemId = intval($_GET['item_id'] ?? 0);
                     <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
                         <div class="p-6 border-b border-gray-100 dark:border-gray-700">
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white">Create Loan Request</h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Add items to your cart and submit the request.</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Add items to your cart via the "Add Items" section below or the cart icon in the header.</p>
                         </div>
 
                         <div class="p-6 md:p-8 space-y-8">
                             
-                            
+                            <!-- Add Item Form -->
                             <div class="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-700">
                                 <h4 class="font-medium mb-4 flex items-center gap-2">
                                     <i data-lucide="plus-circle" class="w-4 h-4 text-orange-500"></i>
                                     Add Items
                                 </h4>
                                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                                    <div class="md:col-span-6">
+                                    <div class="md:col-span-8">
                                         <label class="block text-sm text-gray-500 dark:text-gray-400 mb-1">Select Item</label>
                                         <select x-model="currentItemId" @change="updateMaxStock"
                                                 class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none text-sm">
@@ -171,26 +171,21 @@ $selectedItemId = intval($_GET['item_id'] ?? 0);
                                         <input type="number" x-model.number="currentQty" min="1" :max="currentMaxStock"
                                                class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none text-sm">
                                     </div>
-                                    <div class="md:col-span-4">
-                                         <label class="block text-sm text-gray-500 dark:text-gray-400 mb-1">Notes (Optional)</label>
-                                         <input type="text" x-model="currentNote" placeholder="Specific reqs..."
-                                               class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none text-sm">
-                                    </div>
-                                    <div class="md:col-span-12 mt-2">
+                                    <div class="md:col-span-2 mt-2">
                                         <button @click="addToCart" :disabled="!isValidItem"
                                                 class="w-full md:w-auto px-4 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-xl font-medium text-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2">
-                                            <i data-lucide="shopping-cart" class="w-4 h-4"></i> Add to List
+                                            <i data-lucide="shopping-cart" class="w-4 h-4"></i> Add to Cart
                                         </button>
                                         <p x-show="currentMaxStock > 0" class="text-xs text-gray-500 mt-2">Max allowed: <span x-text="currentMaxStock"></span></p>
                                     </div>
                                 </div>
                             </div>
 
-                            
-                            <div x-show="cart.length > 0" x-cloak>
+                            <!-- Cart Summary Table (Read-Only) -->
+                             <div x-show="$store.cart.items.length > 0" x-cloak>
                                 <h4 class="font-medium mb-4 flex items-center gap-2">
                                     <i data-lucide="list" class="w-4 h-4 text-orange-500"></i>
-                                    Items to Request
+                                    Summary of Request
                                 </h4>
                                 <div class="overflow-x-auto rounded-xl border border-gray-100 dark:border-gray-700">
                                     <table class="w-full text-left border-collapse">
@@ -198,54 +193,58 @@ $selectedItemId = intval($_GET['item_id'] ?? 0);
                                             <tr class="bg-gray-50 dark:bg-gray-900/50 text-xs text-gray-500 uppercase">
                                                 <th class="p-3">Item</th>
                                                 <th class="p-3">Qty</th>
-                                                <th class="p-3">Notes</th>
-                                                <th class="p-3 text-right">Action</th>
                                             </tr>
                                         </thead>
-                                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                                            <template x-for="(item, index) in cart" :key="index">
-                                                <tr class="text-sm bg-white dark:bg-gray-800">
-                                                    <td class="p-3" x-text="item.name"></td>
-                                                    <td class="p-3" x-text="item.jumlah"></td>
-                                                    <td class="p-3 text-gray-500" x-text="item.catatan || '-'"></td>
-                                                    <td class="p-3 text-right">
-                                                        <button @click="removeFromCart(index)" class="text-red-500 hover:text-red-700 transition-colors">
-                                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        <tbody>
+                                            <template x-for="(item, index) in $store.cart.items" :key="item.id">
+                                                <tr class="border-b border-gray-50 dark:border-gray-700/50 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                                    <td class="p-3">
+                                                        <span class="font-medium text-gray-900 dark:text-white" x-text="item.name"></span>
+                                                        <span class="text-xs text-gray-500 block" x-text="item.category"></span>
+                                                    </td>
+                                                    <td class="p-3 font-medium text-gray-900 dark:text-white" x-text="item.qty"></td>
+                                                    <td class="p-3">
+                                                        <button @click="$store.cart.remove(index)" class="text-red-500 hover:text-red-700 transition-colors p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                                                            <!-- Trash Icon -->
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                                                         </button>
                                                     </td>
                                                 </tr>
                                             </template>
                                         </tbody>
+                                        <tfoot>
+                                            <tr class="bg-gray-50 dark:bg-gray-900/50">
+                                                <td class="p-3 font-bold text-gray-900 dark:text-white text-right">Total Items</td>
+                                                <td class="p-3 font-bold text-gray-900 dark:text-white" x-text="$store.cart.count"></td>
+                                            </tr>
+                                        </tfoot>
                                     </table>
                                 </div>
                             </div>
 
                             
-                            <form method="POST" @submit.prevent="submitForm">
-                                <input type="hidden" name="items_json" x-model="itemsJson">
+                            <form action="" method="POST" @submit="submitLoan" class="space-y-6 pt-4 border-t border-gray-100 dark:border-gray-700">
+                                <input type="hidden" name="items_json" :value="JSON.stringify($store.cart.items)">
                                 
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Date Required</label>
-                                        <input type="date" name="tanggal_pinjam" required min="<?= date('Y-m-d') ?>"
-                                               class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Borrowed Date</label>
+                                        <input type="date" name="tanggal_pinjam" required
+                                               class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all">
                                     </div>
                                     <div>
-                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Global Notes (Optional)</label>
-                                         <input type="text" name="keterangan" placeholder="Overall purpose..."
-                                               class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all">
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Purpose / Notes</label>
+                                        <input type="text" name="keterangan" placeholder="e.g. For project X presentation" required
+                                               class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all">
                                     </div>
                                 </div>
 
-
-                                <div class="flex items-center gap-4 pt-4 border-t border-gray-100 dark:border-gray-700">
-                                    <button type="submit" :disabled="cart.length === 0"
-                                            class="px-6 py-3 bg-gradient-to-r from-orange-500 to-red-600 text-white font-medium rounded-xl hover:shadow-lg hover:shadow-orange-500/30 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:transform-none">
+                                <div class="flex justify-end pt-4">
+                                     <button type="submit" 
+                                            :disabled="!$store.cart.hasItems"
+                                            class="px-8 py-4 bg-orange-600 text-white rounded-xl font-bold shadow-lg shadow-orange-500/30 hover:bg-orange-700 hover:shadow-orange-600/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform hover:-translate-y-1">
                                         Submit Request
                                     </button>
-                                    <a href="browse.php" class="px-6 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
-                                        Cancel
-                                    </a>
                                 </div>
                             </form>
                             
@@ -263,79 +262,66 @@ $selectedItemId = intval($_GET['item_id'] ?? 0);
     <script src="../assets/js/chatbot.js"></script>
 
     <script>
-        function loanRequestApp(items, initialItemId) {
-            return {
+        document.addEventListener('alpine:init', () => {
+             // Main Loan Request App
+            Alpine.data('loanRequestApp', (items, initialSelectedId) => ({
                 availableItems: items,
-                cart: [],
-                currentItemId: initialItemId || '',
+                currentItemId: '',
                 currentQty: 1,
-                currentNote: '',
                 currentMaxStock: 0,
-                
-                get itemsJson() {
-                    
-                    return JSON.stringify(this.cart.map(i => ({
-                         inventaris_id: i.id,
-                         jumlah: i.jumlah,
-                         catatan: i.catatan
-                    })));
-                },
-                
-                get isValidItem() {
-                    return this.currentItemId && this.currentQty > 0 && this.currentQty <= this.currentMaxStock;
-                },
-                
+                // Note: Cart is now global via $store.cart
+
                 init() {
-                    this.updateMaxStock();
+                    if (initialSelectedId) {
+                        this.currentItemId = initialSelectedId;
+                        this.updateMaxStock();
+                    }
                 },
 
                 updateMaxStock() {
                     const item = this.availableItems.find(i => i.id == this.currentItemId);
-                    this.currentMaxStock = item ? item.stok_tersedia : 0;
-                    if(this.currentQty > this.currentMaxStock) this.currentQty = this.currentMaxStock;
+                    if (item) {
+                        this.currentMaxStock = item.stok_tersedia;
+                        this.currentQty = 1;
+                    } else {
+                        this.currentMaxStock = 0;
+                        this.currentQty = 0;
+                    }
+                },
+
+                get isValidItem() {
+                    return this.currentItemId && this.currentQty > 0 && this.currentQty <= this.currentMaxStock;
                 },
 
                 addToCart() {
+                    if (!this.isValidItem) return;
+                    
                     const item = this.availableItems.find(i => i.id == this.currentItemId);
-                    if (!item) return;
-
-                    
-                    const existing = this.cart.find(c => c.id == this.currentItemId);
-                    if (existing) {
-                        if (existing.jumlah + this.currentQty <= this.currentMaxStock) {
-                            existing.jumlah += this.currentQty;
-                        } else {
-                            alert('Cannot add more of this item. Stock limit reached.');
-                        }
-                    } else {
-                        this.cart.push({
-                            id: item.id,
-                            name: item.nama_barang,
-                            jumlah: this.currentQty,
-                            catatan: this.currentNote
-                        });
+                    if (item) {
+                        // Use global store
+                        Alpine.store('cart').add(item, this.currentQty, this.currentNote);
+                        
+                        // Reset form
+                        this.currentItemId = '';
+                        this.currentQty = 1;
+                        this.currentMaxStock = 0;
+                        this.currentNote = '';
                     }
-
-                    
-                    this.currentItemId = '';
-                    this.currentQty = 1;
-                    this.currentNote = '';
-                    this.currentMaxStock = 0;
                 },
 
-                removeFromCart(index) {
-                    this.cart.splice(index, 1);
-                },
-                
-                submitForm(e) {
-                    if (this.cart.length === 0) {
-                        alert('Please add items to your request.');
+                submitLoan(e) {
+                    if (!Alpine.store('cart').hasItems) {
+                        alert('Please add items to your cart first.');
+                        e.preventDefault();
                         return;
                     }
-                    e.target.submit();
+                    if (!confirm('Are you sure you want to submit this loan request?')) {
+                        e.preventDefault();
+                    }
+                    // If confirmed, form submits naturally.
                 }
-            }
-        }
+            }));
+        });
     </script>
 </body>
 </html>
