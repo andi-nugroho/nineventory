@@ -1,61 +1,52 @@
 <?php
-/**
- * Loan Management Class
- * Handles loan transactions and approvals
- */
-
 namespace Nineventory;
 
 class Loan
 {
     private $pdo;
     private $inventory;
-    
+
     public function __construct($pdo)
     {
         $this->pdo = $pdo;
         $this->inventory = new Inventory($pdo);
     }
-    
-    /**
-     * Create new loan request
-     */
+
+
     public function create($user_id, $inventaris_id, $jumlah, $tanggal_pinjam, $keterangan = null)
     {
         try {
-            // Check if item exists and has enough stock
+
             $item = $this->inventory->getById($inventaris_id);
-            
+
             if (!$item) {
                 return ['success' => false, 'message' => 'Barang tidak ditemukan'];
             }
-            
+
             if ($item['stok_tersedia'] < $jumlah) {
                 return ['success' => false, 'message' => 'Stok tidak mencukupi. Tersedia: ' . $item['stok_tersedia']];
             }
-            
+
             $stmt = $this->pdo->prepare(
-                "INSERT INTO peminjaman (user_id, inventaris_id, jumlah, tanggal_pinjam, keterangan) 
+                "INSERT INTO peminjaman (user_id, inventaris_id, jumlah, tanggal_pinjam, keterangan)
                  VALUES (?, ?, ?, ?, ?)"
             );
-            
+
             $stmt->execute([$user_id, $inventaris_id, $jumlah, $tanggal_pinjam, $keterangan]);
-            
+
             return ['success' => true, 'message' => 'Pengajuan peminjaman berhasil dibuat', 'id' => $this->pdo->lastInsertId()];
-            
+
         } catch (\PDOException $e) {
             return ['success' => false, 'message' => 'Gagal membuat pengajuan: ' . $e->getMessage()];
         }
     }
-    
-    /**
-     * Get loans by user ID
-     */
+
+
     public function getByUserId($user_id)
     {
         try {
             $stmt = $this->pdo->prepare(
-                "SELECT p.*, i.nama_barang, i.kategori 
+                "SELECT p.*, i.nama_barang, i.kategori
                  FROM peminjaman p
                  JOIN inventaris i ON p.inventaris_id = i.id
                  WHERE p.user_id = ?
@@ -67,10 +58,8 @@ class Loan
             return [];
         }
     }
-    
-    /**
-     * Get all pending loan requests
-     */
+
+
     public function getPending()
     {
         try {
@@ -87,10 +76,8 @@ class Loan
             return [];
         }
     }
-    
-    /**
-     * Get all loans with details
-     */
+
+
     public function getAll()
     {
         try {
@@ -106,10 +93,8 @@ class Loan
             return [];
         }
     }
-    
-    /**
-     * Get loan by ID
-     */
+
+
     public function getById($id)
     {
         try {
@@ -126,59 +111,57 @@ class Loan
             return null;
         }
     }
-    
-    /**
-     * Approve loan request and update inventory stock
-     */
+
+
     public function approve($id, $tanggal_kembali = null)
     {
         try {
             $this->pdo->beginTransaction();
-            
-            // Get loan details
+
+
             $loan = $this->getById($id);
-            
+
             if (!$loan) {
                 $this->pdo->rollBack();
                 return ['success' => false, 'message' => 'Peminjaman tidak ditemukan'];
             }
-            
+
             if ($loan['status'] !== 'pending') {
                 $this->pdo->rollBack();
                 return ['success' => false, 'message' => 'Peminjaman sudah diproses'];
             }
-            
-            // Check stock availability
+
+
             if ($loan['stok_tersedia'] < $loan['jumlah']) {
                 $this->pdo->rollBack();
                 return ['success' => false, 'message' => 'Stok tidak mencukupi'];
             }
-            
-            // Validate return date
+
+
             if ($tanggal_kembali) {
                 $tanggal_pinjam = strtotime($loan['tanggal_pinjam']);
                 $tanggal_kembali_ts = strtotime($tanggal_kembali);
-                
+
                 if ($tanggal_kembali_ts <= $tanggal_pinjam) {
                     $this->pdo->rollBack();
                     return ['success' => false, 'message' => 'Tanggal pengembalian harus setelah tanggal pinjam'];
                 }
             }
-            
-            // Update loan status with expected return date
+
+
             $stmt = $this->pdo->prepare(
                 "UPDATE peminjaman SET status = 'approved', tanggal_kembali_rencana = ? WHERE id = ?"
             );
             $stmt->execute([$tanggal_kembali, $id]);
-            
-            // Decrease inventory stock directly (without nested transaction)
+
+
             $stmt = $this->pdo->prepare("UPDATE inventaris SET stok_tersedia = stok_tersedia - ? WHERE id = ?");
             $stmt->execute([$loan['jumlah'], $loan['inventaris_id']]);
-            
+
             $this->pdo->commit();
-            
+
             return ['success' => true, 'message' => 'Peminjaman berhasil disetujui'];
-            
+
         } catch (\PDOException $e) {
             if ($this->pdo->inTransaction()) {
                 $this->pdo->rollBack();
@@ -186,10 +169,8 @@ class Loan
             return ['success' => false, 'message' => 'Gagal menyetujui peminjaman: ' . $e->getMessage()];
         }
     }
-    
-    /**
-     * Reject loan request
-     */
+
+
     public function reject($id, $reason = null)
     {
         try {
@@ -197,53 +178,51 @@ class Loan
                 "UPDATE peminjaman SET status = 'rejected', alasan_reject = ? WHERE id = ? AND status = 'pending'"
             );
             $stmt->execute([$reason, $id]);
-            
+
             if ($stmt->rowCount() === 0) {
                 return ['success' => false, 'message' => 'Peminjaman tidak ditemukan atau sudah diproses'];
             }
-            
+
             return ['success' => true, 'message' => 'Peminjaman berhasil ditolak'];
-            
+
         } catch (\PDOException $e) {
             return ['success' => false, 'message' => 'Gagal menolak peminjaman: ' . $e->getMessage()];
         }
     }
-    
-    /**
-     * Mark loan as returned and restore inventory stock
-     */
+
+
     public function markReturned($id)
     {
         try {
             $this->pdo->beginTransaction();
-            
-            // Get loan details
+
+
             $loan = $this->getById($id);
-            
+
             if (!$loan) {
                 $this->pdo->rollBack();
                 return ['success' => false, 'message' => 'Peminjaman tidak ditemukan'];
             }
-            
+
             if ($loan['status'] !== 'approved') {
                 $this->pdo->rollBack();
                 return ['success' => false, 'message' => 'Hanya peminjaman yang disetujui yang bisa dikembalikan'];
             }
-            
-            // Update loan status
+
+
             $stmt = $this->pdo->prepare(
                 "UPDATE peminjaman SET status = 'returned', tanggal_kembali = CURDATE() WHERE id = ?"
             );
             $stmt->execute([$id]);
-            
-            // Restore inventory stock directly (without nested transaction)
+
+
             $stmt = $this->pdo->prepare("UPDATE inventaris SET stok_tersedia = stok_tersedia + ? WHERE id = ?");
             $stmt->execute([$loan['jumlah'], $loan['inventaris_id']]);
-            
+
             $this->pdo->commit();
-            
+
             return ['success' => true, 'message' => 'Barang berhasil dikembalikan'];
-            
+
         } catch (\PDOException $e) {
             if ($this->pdo->inTransaction()) {
                 $this->pdo->rollBack();
@@ -251,33 +230,31 @@ class Loan
             return ['success' => false, 'message' => 'Gagal mengembalikan barang: ' . $e->getMessage()];
         }
     }
-    
-    /**
-     * Get loan statistics
-     */
+
+
     public function getStats()
     {
         try {
             $stats = [];
-            
-            // Pending requests
+
+
             $stmt = $this->pdo->query("SELECT COUNT(*) as total FROM peminjaman WHERE status = 'pending'");
             $stats['pending'] = $stmt->fetch()['total'];
-            
-            // Approved loans
+
+
             $stmt = $this->pdo->query("SELECT COUNT(*) as total FROM peminjaman WHERE status = 'approved'");
             $stats['approved'] = $stmt->fetch()['total'];
-            
-            // Returned loans
+
+
             $stmt = $this->pdo->query("SELECT COUNT(*) as total FROM peminjaman WHERE status = 'returned'");
             $stats['returned'] = $stmt->fetch()['total'];
-            
-            // Rejected requests
+
+
             $stmt = $this->pdo->query("SELECT COUNT(*) as total FROM peminjaman WHERE status = 'rejected'");
             $stats['rejected'] = $stmt->fetch()['total'];
-            
+
             return $stats;
-            
+
         } catch (\PDOException $e) {
             return [
                 'pending' => 0,
@@ -287,36 +264,31 @@ class Loan
             ];
         }
     }
-    /**
-     * Count active loans (approved)
-     */
+
+
     public function countActive()
     {
         $stmt = $this->pdo->query("SELECT COUNT(*) FROM peminjaman WHERE status = 'approved'");
         return $stmt->fetchColumn();
     }
 
-    /**
-     * Count pending loans
-     */
+
     public function countPending()
     {
         $stmt = $this->pdo->query("SELECT COUNT(*) FROM peminjaman WHERE status = 'pending'");
         return $stmt->fetchColumn();
     }
 
-    /**
-     * Get recent loans
-     */
+    
     public function getRecent($limit = 5)
     {
         try {
             $stmt = $this->pdo->prepare(
-                "SELECT p.*, u.username, i.nama_barang 
+                "SELECT p.*, u.username, i.nama_barang
                  FROM peminjaman p
                  JOIN users u ON p.user_id = u.id
                  JOIN inventaris i ON p.inventaris_id = i.id
-                 ORDER BY p.created_at DESC 
+                 ORDER BY p.created_at DESC
                  LIMIT ?"
             );
             $stmt->bindValue(1, $limit, \PDO::PARAM_INT);
