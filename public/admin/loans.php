@@ -103,14 +103,14 @@ $pendingLoans = $loan->getPending();
           modalOpen: false,
           modalData: {
               id: null,
-              item: '',
+              items: '',
               user: '',
               date: '',
               minReturnDate: ''
           },
           openApprovalModal(loan) {
               this.modalData.id = loan.id;
-              this.modalData.item = loan.nama_barang;
+              this.modalData.items = loan.items_summary;
               this.modalData.user = loan.username;
               this.modalData.date = loan.tanggal_pinjam;
 
@@ -197,7 +197,7 @@ $pendingLoans = $loan->getPending();
                                             </div>
                                             <div>
                                                 <div class="font-bold text-gray-900 dark:text-white"><?= htmlspecialchars($item['username']) ?></div>
-                                                <div class="text-xs text-gray-500"><?= date('M d, Y', strtotime($item['tanggal_pinjam'])) ?></div>
+                                                <div class="text-xs text-gray-500">ID: <?= $item['kode_peminjaman'] ?? 'LOAN-' . $item['id'] ?></div>
                                             </div>
                                         </div>
                                         <span class="px-2 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-xs font-semibold rounded-lg">Pending</span>
@@ -205,15 +205,17 @@ $pendingLoans = $loan->getPending();
 
                                     <div class="space-y-2 mb-6 flex-1">
                                         <div class="flex justify-between text-sm">
-                                            <span class="text-gray-500 dark:text-gray-400">Item:</span>
-                                            <span class="font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($item['nama_barang']) ?></span>
+                                            <span class="text-gray-500 dark:text-gray-400">Date:</span>
+                                            <span class="font-medium text-gray-900 dark:text-white"><?= date('M d, Y', strtotime($item['tanggal_pinjam'])) ?></span>
                                         </div>
-                                        <div class="flex justify-between text-sm">
-                                            <span class="text-gray-500 dark:text-gray-400">Qty:</span>
-                                            <span class="font-medium text-gray-900 dark:text-white"><?= $item['jumlah'] ?> (Avail: <?= $item['stok_tersedia'] ?>)</span>
+                                        <div class="block text-sm">
+                                            <span class="text-gray-500 dark:text-gray-400 block mb-1">Items (<?= $item['total_items'] ?>):</span>
+                                            <span class="font-medium text-gray-900 dark:text-white text-sm line-clamp-2" title="<?= htmlspecialchars($item['items_summary']) ?>">
+                                                <?= htmlspecialchars($item['items_summary']) ?>
+                                            </span>
                                         </div>
                                         <?php if($item['keterangan']): ?>
-                                        <div class="bg-gray-50 dark:bg-gray-750 p-3 rounded-xl text-sm text-gray-600 dark:text-gray-300 mt-2">
+                                        <div class="bg-gray-50 dark:bg-gray-750 p-3 rounded-xl text-sm text-gray-600 dark:text-gray-300 mt-2 italic">
                                             "<?= htmlspecialchars($item['keterangan']) ?>"
                                         </div>
                                         <?php endif; ?>
@@ -239,7 +241,7 @@ $pendingLoans = $loan->getPending();
                                 <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400">
                                     <tr>
                                         <th class="px-6 py-4 font-semibold">User</th>
-                                        <th class="px-6 py-4 font-semibold">Item</th>
+                                        <th class="px-6 py-4 font-semibold">Items</th>
                                         <th class="px-6 py-4 font-semibold">Borrowed</th>
                                         <th class="px-6 py-4 font-semibold">Due Date</th>
                                         <th class="px-6 py-4 font-semibold">Returned</th>
@@ -251,9 +253,8 @@ $pendingLoans = $loan->getPending();
                                     <?php foreach ($allLoans as $item): ?>
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
                                         <td class="px-6 py-4 font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($item['username']) ?></td>
-                                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                            <?= htmlspecialchars($item['nama_barang']) ?>
-                                            <span class="text-xs text-gray-400 block">Qty: <?= $item['jumlah'] ?></span>
+                                        <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate" title="<?= htmlspecialchars($item['items_summary']) ?>">
+                                            <?= htmlspecialchars($item['items_summary']) ?>
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= date('M d, Y', strtotime($item['tanggal_pinjam'])) ?></td>
                                         <td class="px-6 py-4">
@@ -315,9 +316,9 @@ $pendingLoans = $loan->getPending();
                                         <span class="text-gray-500 dark:text-gray-400">User</span>
                                         <span class="font-medium text-gray-900 dark:text-white" x-text="modalData.user"></span>
                                     </div>
-                                    <div class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
-                                        <span class="text-gray-500 dark:text-gray-400">Item</span>
-                                        <span class="font-medium text-gray-900 dark:text-white" x-text="modalData.item"></span>
+                                    <div class="border-b border-gray-100 dark:border-gray-700 pb-2">
+                                        <span class="text-gray-500 dark:text-gray-400 block mb-1">Items</span>
+                                        <span class="font-medium text-gray-900 dark:text-white text-sm" x-text="modalData.items"></span>
                                     </div>
                                     <div class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
                                         <span class="text-gray-500 dark:text-gray-400">Borrowed On</span>
@@ -332,7 +333,7 @@ $pendingLoans = $loan->getPending();
                                                :min="modalData.minReturnDate"
                                                x-model="modalData.defaultReturn"
                                                class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 outline-none">
-                                        <p class="text-xs text-gray-500 mt-1">Specify when this item must be returned.</p>
+                                        <p class="text-xs text-gray-500 mt-1">Specify when these items must be returned.</p>
                                     </div>
                                 </div>
                             </div>

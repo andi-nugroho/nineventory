@@ -11,10 +11,27 @@ class Inventory
     }
 
 
-    public function getAll()
+    public function getAll($search = '', $category = '')
     {
         try {
-            $stmt = $this->pdo->query("SELECT * FROM inventaris ORDER BY created_at DESC");
+            $sql = "SELECT * FROM inventaris WHERE 1=1";
+            $params = [];
+
+            if (!empty($search)) {
+                $sql .= " AND (nama_barang LIKE ? OR deskripsi LIKE ?)";
+                $params[] = "%$search%";
+                $params[] = "%$search%";
+            }
+
+            if (!empty($category)) {
+                $sql .= " AND kategori = ?";
+                $params[] = $category;
+            }
+
+            $sql .= " ORDER BY created_at DESC";
+
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
             return $stmt->fetchAll();
         } catch (\PDOException $e) {
             return [];

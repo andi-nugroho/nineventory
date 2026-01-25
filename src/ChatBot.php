@@ -28,17 +28,14 @@ class ChatBot
         $this->loan = new Loan($pdo);
     }
 
-    /**
-     * Send message to chatbot and get response
-     * Tries Cohere AI first, falls back to rule-based
-     */
+    
     public function sendMessage($userMessage, $userId = null)
     {
         try {
-            // Get inventory context
+            
             $context = $this->getInventoryContext($userId);
 
-            // Try Cohere AI if available
+            
             if (!empty($this->apiKey) && $this->aiProvider === 'cohere') {
                 try {
                     $prompt = $this->buildPrompt($userMessage, $context);
@@ -49,11 +46,11 @@ class ChatBot
                         'message' => $response
                     ];
                 } catch (\Exception $e) {
-                    // Fall through to rule-based on AI error
+                    
                 }
             }
 
-            // Fallback to rule-based response
+            
             $response = $this->generateResponse($userMessage, $context);
 
             return [
@@ -69,9 +66,8 @@ class ChatBot
         }
     }
 
-    /**
-     * Call Cohere API (Chat endpoint)
-     */
+    
+    
     private function callCohereAPI($prompt)
     {
         $url = "https://api.cohere.ai/v1/chat";
@@ -103,9 +99,8 @@ class ChatBot
         throw new \Exception("Unexpected response format");
     }
 
-    /**
-     * Build prompt with inventory context for AI
-     */
+    
+    
     private function buildPrompt($userMessage, $context)
     {
         $systemRole = "Anda adalah asisten virtual untuk sistem inventaris kantor NINEVENTORY. " .
@@ -136,9 +131,8 @@ class ChatBot
                "\n\nJawab berdasarkan data di atas dengan singkat dan jelas.";
     }
 
-    /**
-     * Call Hugging Face Inference API
-     */
+    
+    
     private function callHuggingFaceAPI($prompt)
     {
         $url = "https://router.huggingface.co/models/{$this->model}";
@@ -172,58 +166,56 @@ class ChatBot
         throw new \Exception("Unexpected response format");
     }
 
-    /**
-     * Generate response based on user message pattern
-     */
+    
+    
     private function generateResponse($message, $context)
     {
         $message = strtolower($message);
 
-        // Pattern: Stok barang tertentu
+        
         if (preg_match('/(berapa|cek|lihat).*(stok|tersedia).*(laptop|proyektor|printer|mouse|keyboard|monitor|kamera|speaker|headset|tablet)/i', $message, $matches)) {
             $itemName = $matches[3];
             return $this->getStockInfo($itemName, $context);
         }
 
-        // Pattern: Daftar semua barang
+        
         if (preg_match('/(barang|item|inventaris).*(apa|ada|tersedia|list|daftar)/i', $message) ||
             preg_match('/(apa|ada).*(barang|item)/i', $message)) {
             return $this->listAllItems($context);
         }
 
-        // Pattern: Total peminjaman
+        
         if (preg_match('/(berapa|total).*(pinjam|dipinjam|sedang dipinjam)/i', $message)) {
             return $this->getLoanInfo($context);
         }
 
-        // Pattern: Lokasi barang
+        
         if (preg_match('/(dimana|lokasi|tempat).*(laptop|proyektor|printer|mouse|keyboard|monitor|kamera|speaker|headset|tablet)/i', $message, $matches)) {
             $itemName = $matches[2];
             return $this->getLocationInfo($itemName, $context);
         }
 
-        // Pattern: Statistik
+        
         if (preg_match('/(statistik|stats|total|jumlah).*(barang|inventaris)/i', $message)) {
             return $this->getStatistics($context);
         }
 
-        // Pattern: Riwayat user
+        
         if (preg_match('/(riwayat|history|peminjaman saya)/i', $message)) {
             return $this->getUserHistory($context);
         }
 
-        // Default response with suggestions
+        
         return $this->getDefaultResponse();
     }
 
-    /**
-     * Get inventory context for AI
-     */
+    
+    
     private function getInventoryContext($userId = null)
     {
         $context = [];
 
-        // Get inventory data
+        
         $inventoryItems = $this->inventory->getAll();
         $context['inventory'] = array_map(function($item) {
             return [
@@ -236,19 +228,19 @@ class ChatBot
             ];
         }, $inventoryItems);
 
-        // Get inventory stats
+        
         $context['stats'] = $this->inventory->getStats();
 
-        // Get loan stats
+        
         $context['loan_stats'] = $this->loan->getStats();
 
-        // If user is logged in, get their loan history
+        
         if ($userId) {
             $userLoans = $this->loan->getByUserId($userId);
             $context['user_loans'] = array_map(function($loan) {
                 return [
-                    'nama_barang' => $loan['nama_barang'],
-                    'jumlah' => $loan['jumlah'],
+                    'nama_barang' => $loan['items_summary'] ?? 'Multiple Items',
+                    'jumlah' => $loan['total_items'] ?? 0,
                     'tanggal_pinjam' => $loan['tanggal_pinjam'],
                     'status' => $loan['status']
                 ];
@@ -258,9 +250,8 @@ class ChatBot
         return $context;
     }
 
-    /**
-     * Get stock information for specific item
-     */
+    
+    
     private function getStockInfo($itemName, $context)
     {
         foreach ($context['inventory'] as $item) {
@@ -276,9 +267,8 @@ class ChatBot
         return "❌ Maaf, barang '$itemName' tidak ditemukan dalam inventaris.";
     }
 
-    /**
-     * List all inventory items
-     */
+    
+    
     private function listAllItems($context)
     {
         $response = "📦 **Daftar Barang Inventaris:**\n\n";
@@ -292,9 +282,8 @@ class ChatBot
         return $response;
     }
 
-    /**
-     * Get loan information
-     */
+    
+    
     private function getLoanInfo($context)
     {
         $stats = $context['loan_stats'];
@@ -306,9 +295,8 @@ class ChatBot
                "Total barang sedang dipinjam: **{$stats['approved']}** unit";
     }
 
-    /**
-     * Get location information for specific item
-     */
+    
+    
     private function getLocationInfo($itemName, $context)
     {
         foreach ($context['inventory'] as $item) {
@@ -322,9 +310,8 @@ class ChatBot
         return "❌ Maaf, barang '$itemName' tidak ditemukan.";
     }
 
-    /**
-     * Get overall statistics
-     */
+    
+    
     private function getStatistics($context)
     {
         $stats = $context['stats'];
@@ -336,9 +323,8 @@ class ChatBot
                "Tingkat penggunaan: " . round(($stats['borrowed_stock'] / $stats['total_stock']) * 100, 1) . "%";
     }
 
-    /**
-     * Get user loan history
-     */
+    
+    
     private function getUserHistory($context)
     {
         if (!isset($context['user_loans']) || empty($context['user_loans'])) {
@@ -362,9 +348,8 @@ class ChatBot
         return $response;
     }
 
-    /**
-     * Default response with suggestions
-     */
+    
+    
     private function getDefaultResponse()
     {
         return "👋 Halo! Saya asisten NINEVENTORY. Saya bisa membantu Anda dengan:\n\n" .

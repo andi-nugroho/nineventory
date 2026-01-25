@@ -81,6 +81,10 @@ $pathPrefix = $pathPrefix ?? './';
                     <i data-lucide="check-square" class="w-5 h-5 text-neutral-700 dark:text-neutral-200"></i>
                     <span class="text-neutral-700 dark:text-neutral-200 text-sm font-medium">Approvals</span>
                 </a>
+                <a href="<?= $pathPrefix ?>admin/activity.php" class="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors <?= $activePage === 'activity' ? 'bg-neutral-100 dark:bg-neutral-800' : '' ?>">
+                    <i data-lucide="activity" class="w-5 h-5 text-neutral-700 dark:text-neutral-200"></i>
+                    <span class="text-neutral-700 dark:text-neutral-200 text-sm font-medium">Recent Activity</span>
+                </a>
                 <?php endif; ?>
 
                 <div class="mt-auto border-t border-neutral-200 dark:border-neutral-700 pt-3">
@@ -156,6 +160,13 @@ $pathPrefix = $pathPrefix ?? './';
                         <span x-show="open"
                               class="text-neutral-700 dark:text-neutral-200 text-sm font-medium group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
                               style="display: none;">Approvals</span>
+                    </a>
+
+                    <a href="<?= $pathPrefix ?>admin/activity.php" class="flex items-center justify-start gap-3 group/sidebar p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700/50 transition-colors <?= $activePage === 'activity' ? 'bg-neutral-200 dark:bg-neutral-700' : '' ?>">
+                        <i data-lucide="activity" class="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0"></i>
+                        <span x-show="open"
+                              class="text-neutral-700 dark:text-neutral-200 text-sm font-medium group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
+                              style="display: none;">Recent Activity</span>
                     </a>
                 <?php endif; ?>
             </div>

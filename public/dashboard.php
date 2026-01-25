@@ -203,7 +203,9 @@ $recentLoans = $loan->getRecent(5);
                                                     <span class="text-sm font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($loan['username']) ?></span>
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300"><?= htmlspecialchars($loan['nama_barang']) ?></td>
+                                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 max-w-xs truncate" title="<?= htmlspecialchars($loan['items_summary']) ?>">
+                                                <?= htmlspecialchars($loan['items_summary']) ?>
+                                            </td>
                                             <td class="px-6 py-4">
                                                 <?php
                                                 $statusColor = match($loan['status']) {
