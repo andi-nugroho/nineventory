@@ -1,5 +1,3 @@
-// NINEVENTORY - Chatbot JavaScript
-
 class ChatBot {
     constructor() {
         this.chatBox = document.getElementById('chatBox');
@@ -12,12 +10,12 @@ class ChatBot {
     }
 
     init() {
-        // Chat launcher click
+
         document.getElementById('chatLauncher').addEventListener('click', () => {
             this.toggleChat();
         });
 
-        // Chat close button
+
         document.getElementById('chatClose').addEventListener('click', () => {
             this.toggleChat();
         });
@@ -28,7 +26,7 @@ class ChatBot {
             this.sendMessage();
         });
 
-        // Welcome message with quick replies
+
         this.addMessage('bot', 'Halo! 👋 Saya adalah asisten AI NINEVENTORY. Ada yang bisa saya bantu?');
         this.addQuickReplies();
     }
@@ -52,7 +50,7 @@ class ChatBot {
             btn.onclick = () => {
                 this.chatInput.value = suggestion;
                 this.sendMessage();
-                // Remove quick replies after first use
+
                 document.getElementById('quickReplies')?.remove();
             };
             quickRepliesDiv.appendChild(btn);
@@ -74,17 +72,17 @@ class ChatBot {
 
         if (!message) return;
 
-        // Add user message to chat
+
         this.addMessage('user', message);
 
-        // Clear input
+
         this.chatInput.value = '';
 
-        // Show typing indicator
+
         this.showTyping();
 
         try {
-            // Send to backend chatbot API (rule-based, works without external API)
+
             const response = await fetch('api/chatbot.php', {
                 method: 'POST',
                 headers: {
@@ -95,7 +93,7 @@ class ChatBot {
 
             const data = await response.json();
 
-            // Hide typing indicator
+
             this.hideTyping();
 
             if (data.success) {
@@ -152,7 +150,7 @@ class ChatBot {
     }
 }
 
-// Initialize chatbot when DOM is ready
+
 document.addEventListener('DOMContentLoaded', () => {
     new ChatBot();
 });
