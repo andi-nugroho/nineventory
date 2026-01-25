@@ -342,4 +342,26 @@ class Loan
             return [];
         }
     }
+
+    public function getMostBorrowedItems($limit = 5)
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                "SELECT i.nama_barang, SUM(pd.jumlah) as total_borrowed
+                 FROM peminjaman_detail pd
+                 JOIN inventaris i ON pd.inventaris_id = i.id
+                 JOIN peminjaman p ON pd.peminjaman_id = p.id
+                 WHERE p.status IN ('approved', 'returned')
+                 GROUP BY i.id, i.nama_barang
+                 ORDER BY total_borrowed DESC
+                 LIMIT ?"
+            );
+            $stmt->bindValue(1, $limit, \PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (\PDOException $e) {
+            return [];
+        }
+    }
 }
+

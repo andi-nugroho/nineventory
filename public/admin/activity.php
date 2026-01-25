@@ -139,9 +139,16 @@ $activities = $loan->getAll();
                                                     default => 'bg-gray-100 text-gray-700'
                                                 };
                                                 ?>
-                                                <span class="px-2 py-1 rounded-lg text-xs font-semibold <?= $statusColor ?>">
-                                                    <?= ucfirst($item['status']) ?>
-                                                </span>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="px-2 py-1 rounded-lg text-xs font-semibold <?= $statusColor ?>">
+                                                        <?= ucfirst($item['status']) ?>
+                                                    </span>
+                                                    <?php if (in_array($item['status'], ['approved', 'returned'])): ?>
+                                                        <a href="<?= $pathPrefix ?>print_loan.php?id=<?= $item['id'] ?>" target="_blank" class="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Print Proof">
+                                                            <i data-lucide="printer" class="w-4 h-4"></i>
+                                                        </a>
+                                                    <?php endif; ?>
+                                                </div>
                                             </td>
                                         </tr>
                                         <?php endforeach; ?>

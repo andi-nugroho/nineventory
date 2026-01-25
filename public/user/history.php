@@ -127,6 +127,7 @@ $myLoans = $loan->getByUserId($currentUser['id']);
                                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= date('M d, Y', strtotime($item['tanggal_pinjam'])) ?></td>
                                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= $item['tanggal_kembali'] ? date('M d, Y', strtotime($item['tanggal_kembali'])) : '-' ?></td>
                                             <td class="px-6 py-4">
+
                                                 <?php
                                                 $statusColor = match($item['status']) {
                                                     'approved' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
@@ -136,9 +137,16 @@ $myLoans = $loan->getByUserId($currentUser['id']);
                                                     default => 'bg-gray-100 text-gray-700'
                                                 };
                                                 ?>
-                                                <span class="px-2 py-1 rounded-lg text-xs font-semibold <?= $statusColor ?>">
-                                                    <?= ucfirst($item['status']) ?>
-                                                </span>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="px-2 py-1 rounded-lg text-xs font-semibold <?= $statusColor ?>">
+                                                        <?= ucfirst($item['status']) ?>
+                                                    </span>
+                                                    <?php if (in_array($item['status'], ['approved', 'returned'])): ?>
+                                                        <a href="<?= $pathPrefix ?>print_loan.php?id=<?= $item['id'] ?>" target="_blank" class="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Export to PDF">
+                                                            <i data-lucide="printer" class="w-4 h-4"></i>
+                                                        </a>
+                                                    <?php endif; ?>
+                                                </div>
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                                 <?php if ($item['status'] === 'rejected' && $item['alasan_reject']): ?>

@@ -196,7 +196,8 @@ class ChatBot
         }
 
         
-        if (preg_match('/(statistik|stats|total|jumlah).*(barang|inventaris)/i', $message)) {
+        if (preg_match('/(statistik|stats|total|jumlah).*(barang|inventaris)/i', $message) || 
+            preg_match('/(paling|top|banyak).*(laris|dipinjam|pinjam)/i', $message)) {
             return $this->getStatistics($context);
         }
 
@@ -256,12 +257,26 @@ class ChatBot
     {
         foreach ($context['inventory'] as $item) {
             if (stripos($item['nama'], $itemName) !== false) {
+                $response = "";
                 $emoji = $item['stok_tersedia'] > 0 ? '✅' : '❌';
-                return "$emoji **{$item['nama']}**\n\n" .
-                       "📦 Stok Tersedia: **{$item['stok_tersedia']}** dari {$item['stok_total']} unit\n" .
-                       "🏷️ Kategori: {$item['kategori']}\n" .
-                       "⚙️ Kondisi: {$item['kondisi']}\n" .
-                       "📍 Lokasi: {$item['lokasi']}";
+                
+                $response .= "$emoji **{$item['nama']}**\n\n" .
+                             "📦 Stok Tersedia: **{$item['stok_tersedia']}** dari {$item['stok_total']} unit\n" .
+                             "🏷️ Kategori: {$item['kategori']}\n" .
+                             "⚙️ Kondisi: {$item['kondisi']}\n" .
+                             "📍 Lokasi: {$item['lokasi']}";
+
+                if ($item['stok_tersedia'] == 0) {
+                     // Get recommendations
+                     $related = $this->inventory->getRelatedItems($item['kategori'], 0, 3);
+                     if (!empty($related)) {
+                         $response .= "\n\n💡 **Rekomendasi Alternatif:**\n";
+                         foreach($related as $r) {
+                             $response .= "- " . $r['nama_barang'] . " (Stok: " . $r['stok_tersedia'] . ")\n";
+                         }
+                     }
+                }
+                return $response;
             }
         }
         return "❌ Maaf, barang '$itemName' tidak ditemukan dalam inventaris.";
@@ -315,12 +330,25 @@ class ChatBot
     private function getStatistics($context)
     {
         $stats = $context['stats'];
-        return "📊 **Statistik Inventaris NINEVENTORY:**\n\n" .
+        
+        $response = "📊 **Statistik Inventaris NINEVENTORY:**\n\n" .
                "📦 Total Jenis Barang: **{$stats['total_items']}** jenis\n" .
                "📈 Total Stok: **{$stats['total_stock']}** unit\n" .
                "✅ Stok Tersedia: **{$stats['available_stock']}** unit\n" .
                "🔄 Sedang Dipinjam: **{$stats['borrowed_stock']}** unit\n\n" .
-               "Tingkat penggunaan: " . round(($stats['borrowed_stock'] / $stats['total_stock']) * 100, 1) . "%";
+               "Tingkat penggunaan: " . round(($stats['borrowed_stock'] / $stats['total_stock']) * 100, 1) . "%\n\n";
+
+        // Add Insights
+        $topItems = $this->loan->getMostBorrowedItems(3);
+        if (!empty($topItems)) {
+            $response .= "🏆 **Barang Paling Laris:**\n";
+            foreach($topItems as $i => $item) {
+                $rank = $i + 1;
+                $response .= "{$rank}. {$item['nama_barang']} (Dipinjam {$item['total_borrowed']} kali)\n";
+            }
+        }
+
+        return $response;
     }
 
     

@@ -238,4 +238,35 @@ class Inventory
             return [];
         }
     }
+
+    public function getLowStock($limit = 5)
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                "SELECT * FROM inventaris WHERE stok_tersedia <= ? ORDER BY stok_tersedia ASC"
+            );
+            $stmt->execute([$limit]);
+            return $stmt->fetchAll();
+        } catch (\PDOException $e) {
+            return [];
+        }
+    }
+
+    public function getRelatedItems($category, $excludeId = 0, $limit = 3)
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                "SELECT * FROM inventaris 
+                 WHERE kategori = ? AND id != ? AND stok_tersedia > 0 
+                 ORDER BY RAND() LIMIT ?"
+            );
+            $stmt->bindValue(1, $category);
+            $stmt->bindValue(2, $excludeId);
+            $stmt->bindValue(3, $limit, \PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (\PDOException $e) {
+            return [];
+        }
+    }
 }

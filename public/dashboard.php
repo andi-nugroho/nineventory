@@ -171,6 +171,31 @@ $recentLoans = $loan->getRecent(5);
                     </div>
                 </div>
 
+                <?php 
+                $lowStockItems = $inventory->getLowStock(5);
+                if (!empty($lowStockItems) && $isAdmin): 
+                ?>
+                <div class="mb-8 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-3xl">
+                    <div class="flex items-center gap-2 mb-3 px-2">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-red-600 dark:text-red-400"></i>
+                        <h3 class="font-bold text-red-700 dark:text-red-400">Low Stock Alerts</h3>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <?php foreach($lowStockItems as $item): ?>
+                        <div class="bg-white dark:bg-gray-800 p-3 rounded-2xl border border-red-100 dark:border-red-900/30 flex items-center justify-between">
+                            <div>
+                                <div class="font-bold text-gray-900 dark:text-white text-sm"><?= htmlspecialchars($item['nama_barang']) ?></div>
+                                <div class="text-xs text-gray-500">Stock: <span class="font-bold text-red-600"><?= $item['stok_tersedia'] ?></span> / <?= $item['stok_total'] ?></div>
+                            </div>
+                            <a href="admin/inventory.php?search=<?= urlencode($item['nama_barang']) ?>" class="p-2 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors">
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
 
