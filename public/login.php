@@ -6,7 +6,7 @@ use Nineventory\Auth;
 
 $auth = new Auth($pdo);
 
-// Redirect if already logged in
+
 if ($auth->isLoggedIn()) {
     header('Location: dashboard.php');
     exit;
@@ -18,12 +18,12 @@ $success = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
-    
+
     if (empty($email) || empty($password)) {
         $error = 'Email and password are required';
     } else {
         $result = $auth->login($email, $password);
-        
+
         if ($result['success']) {
             header('Location: dashboard.php');
             exit;
@@ -53,33 +53,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body class="bg-gray-50 min-h-screen flex items-center justify-center p-6 md:p-10">
     <div class="w-full max-w-sm md:max-w-4xl">
         <div class="flex flex-col gap-6">
-            <!-- Main Card -->
+
             <div class="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200">
                 <div class="grid md:grid-cols-2">
-                    <!-- Left Column - Form -->
+
                     <div class="p-6 md:p-8">
                         <form method="POST" action="" class="space-y-6">
-                            <!-- Header -->
+
                             <div class="flex flex-col items-center gap-2 text-center">
-                                <img src="assets/images/logo.svg" alt="Vault" class="h-8 w-auto mb-2">
+                                <img src="/logo.svg" alt="Vault" class="h-8 w-auto mb-2">
                                 <h1 class="text-2xl font-bold text-gray-900">Welcome back</h1>
                                 <p class="text-gray-600 text-sm">Login to your NINEVENTORY account</p>
                             </div>
 
-                            <!-- Error Message -->
+
                             <?php if ($error): ?>
                                 <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
                                     <?= htmlspecialchars($error) ?>
                                 </div>
                             <?php endif; ?>
 
-                            <!-- Email Field -->
+
                             <div class="space-y-2">
                                 <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                                <input 
-                                    type="email" 
-                                    id="email" 
-                                    name="email" 
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
                                     placeholder="m@example.com"
                                     required
                                     value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
@@ -87,30 +87,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 >
                             </div>
 
-                            <!-- Password Field -->
+
                             <div class="space-y-2">
                                 <div class="flex items-center justify-between">
                                     <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                                     <a href="#" class="text-sm text-gray-600 hover:text-gray-900 hover:underline">Forgot password?</a>
                                 </div>
-                                <input 
-                                    type="password" 
-                                    id="password" 
-                                    name="password" 
+                                <input
+                                    type="password"
+                                    id="password"
+                                    name="password"
                                     required
                                     class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent transition"
                                 >
                             </div>
 
-                            <!-- Submit Button -->
-                            <button 
-                                type="submit" 
+
+                            <button
+                                type="submit"
                                 class="w-full bg-gradient-to-r from-red-500 to-orange-500 text-white font-medium py-2.5 rounded-lg hover:shadow-lg hover:shadow-red-500/50 transition-all duration-300"
                             >
                                 Login
                             </button>
 
-                            <!-- Divider -->
+
                             <div class="relative">
                                 <div class="absolute inset-0 flex items-center">
                                     <div class="w-full border-t border-gray-300"></div>
@@ -120,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                             </div>
 
-                            <!-- Social Login Buttons -->
+
                             <div class="grid grid-cols-3 gap-3">
                                 <button type="button" class="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition">
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="w-5 h-5">
@@ -139,19 +139,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </button>
                             </div>
 
-                            <!-- Sign Up Link -->
+
                             <p class="text-center text-sm text-gray-600">
                                 Don't have an account? <a href="register.php" class="text-red-600 hover:text-red-700 font-medium hover:underline">Sign up</a>
                             </p>
                         </form>
                     </div>
 
-                    <!-- Right Column - Video Background -->
+
                     <div class="relative hidden md:block bg-gray-900">
-                        <video 
-                            autoplay 
-                            loop 
-                            muted 
+                        <video
+                            autoplay
+                            loop
+                            muted
                             playsinline
                             class="absolute inset-0 w-full h-full object-cover opacity-80"
                         >
@@ -162,7 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
 
-            <!-- Terms & Privacy -->
+            
             <p class="text-center text-xs text-gray-600">
                 By clicking continue, you agree to our <a href="#" class="underline hover:text-gray-900">Terms of Service</a> and <a href="#" class="underline hover:text-gray-900">Privacy Policy</a>.
             </p>
