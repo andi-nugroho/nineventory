@@ -1,24 +1,24 @@
 <?php
-// Ensure $pathPrefix is set (default to current dir)
+
 $pathPrefix = $pathPrefix ?? './';
 ?>
 <header class="h-16 flex items-center justify-between px-4 md:px-6 bg-white/50 dark:bg-gray-900/50 backdrop-blur-md border-b border-gray-200 dark:border-gray-800 z-10 pt-16 md:pt-0">
     <div class="flex items-center gap-3">
         <h1 class="text-xl font-bold text-gray-900 dark:text-white"><?= $pageTitle ?? 'Overview' ?></h1>
     </div>
-    
+
     <div class="flex items-center gap-4">
-        <!-- Theme Toggle -->
+
         <button @click="toggleTheme()" class="p-2 rounded-xl text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors relative overflow-hidden group">
             <div class="relative z-10">
                 <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
                  <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
             </div>
         </button>
-        
-        <div class="h-6 w-px bg-gray-200 dark:bg-gray-700"></div> <!-- Divider -->
 
-        <!-- Profile Dropdown -->
+        <div class="h-6 w-px bg-gray-200 dark:bg-gray-700"></div>
+
+
         <div class="relative" x-data="{ open: false }">
             <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 focus:outline-none group">
                 <div class="h-8 w-8 rounded-full bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white text-xs font-bold shadow-sm ring-2 ring-transparent group-hover:ring-orange-200 dark:group-hover:ring-orange-900/50 transition-all">
@@ -34,9 +34,9 @@ $pathPrefix = $pathPrefix ?? './';
                 </div>
                 <i data-lucide="chevron-down" class="w-4 h-4 text-gray-500 transition-transform duration-200" :class="{ 'rotate-180': open }"></i>
             </button>
+
             
-            <!-- Dropdown Menu -->
-            <div x-show="open" 
+            <div x-show="open"
                  x-transition:enter="transition ease-out duration-200"
                  x-transition:enter-start="opacity-0 scale-95"
                  x-transition:enter-end="opacity-100 scale-100"
@@ -45,7 +45,7 @@ $pathPrefix = $pathPrefix ?? './';
                  x-transition:leave-end="opacity-0 scale-95"
                  class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-100 dark:border-gray-700 py-1 z-50 text-left"
                  style="display: none;">
-                
+
                 <div class="px-4 py-2 border-b border-gray-100 dark:border-gray-700 md:hidden">
                     <p class="text-sm font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($currentUser['username'] ?? 'User') ?></p>
                     <p class="text-xs text-gray-500"><?= isset($isAdmin) && $isAdmin ? 'Administrator' : 'User' ?></p>
