@@ -15,11 +15,11 @@ $isAdmin = $auth->isAdmin();
 $message = '';
 $error = '';
 
-// Handle actions
+
 if (isset($_GET['action']) && isset($_GET['id'])) {
     $action = $_GET['action'];
     $id = $_GET['id'];
-    
+
     if ($action === 'reject') {
         $result = $loan->reject($id, 'Ditolak oleh admin');
         if ($result['success']) {
@@ -37,11 +37,11 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     }
 }
 
-// Handle approval with return date
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['approve_loan'])) {
     $loan_id = intval($_POST['loan_id'] ?? 0);
     $tanggal_kembali = $_POST['tanggal_kembali_rencana'] ?? null;
-    
+
     if ($loan_id && $tanggal_kembali) {
         $result = $loan->approve($loan_id, $tanggal_kembali);
         if ($result['success']) {
@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['approve_loan'])) {
     }
 }
 
-// Get all loans
+
 $allLoans = $loan->getAll();
 $pendingLoans = $loan->getPending();
 ?>
@@ -85,9 +85,11 @@ $pendingLoans = $loan->getPending();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- Alpine.js -->
+
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Lucide Icons -->
+
+
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         [x-cloak] { display: none !important; }
@@ -96,7 +98,7 @@ $pendingLoans = $loan->getPending();
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 font-sans text-slate-800 dark:text-white transition-colors duration-300"
-      x-data="{ 
+      x-data="{
           darkMode: localStorage.getItem('theme') === 'dark',
           modalOpen: false,
           modalData: {
@@ -111,17 +113,17 @@ $pendingLoans = $loan->getPending();
               this.modalData.item = loan.nama_barang;
               this.modalData.user = loan.username;
               this.modalData.date = loan.tanggal_pinjam;
-              
+
               // Set default return date to 7 days from now
               let date = new Date(loan.tanggal_pinjam);
               date.setDate(date.getDate() + 7);
               this.modalData.defaultReturn = date.toISOString().split('T')[0];
-              
+
               // Min date is tomorrow
               let minDate = new Date(loan.tanggal_pinjam);
               minDate.setDate(minDate.getDate() + 1);
               this.modalData.minReturnDate = minDate.toISOString().split('T')[0];
-              
+
               this.modalOpen = true;
           },
           toggleTheme() {
@@ -135,27 +137,27 @@ $pendingLoans = $loan->getPending();
           }
       }"
       x-init="$watch('darkMode', val => val ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark')); if(darkMode) document.documentElement.classList.add('dark');">
-    
+
     <div class="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
-        
-        <!-- Animated Background Gradient -->
+
+
         <div class="fixed inset-0 -z-10 bg-gray-50 dark:bg-gray-950">
             <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-orange-500/10 blur-[100px] animate-pulse"></div>
             <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-red-500/10 blur-[100px] animate-pulse"></div>
         </div>
 
-        <?php 
+        <?php
         $activePage = 'loans';
         $pathPrefix = '../';
-        include '../includes/sidebar.php'; 
+        include '../includes/sidebar.php';
         ?>
 
-        <!-- Main Content -->
+
         <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
-            
-            <?php 
+
+            <?php
             $pageTitle = 'Approvals';
-            include '../includes/header.php'; 
+            include '../includes/header.php';
             ?>
 
             <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth hide-scrollbar">
@@ -166,19 +168,19 @@ $pendingLoans = $loan->getPending();
                             <i data-lucide="check-circle" class="w-5 h-5"></i> <?= htmlspecialchars($message) ?>
                         </div>
                     <?php endif; ?>
-                    
+
                     <?php if ($error): ?>
                         <div class="p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 flex items-center gap-3">
                             <i data-lucide="alert-circle" class="w-5 h-5"></i> <?= htmlspecialchars($error) ?>
                         </div>
                     <?php endif; ?>
 
-                    <!-- Pending Approvals -->
+
                     <div class="space-y-4">
                         <h3 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                              Pending Requests <span class="bg-orange-100 text-orange-600 dark:bg-orange-900/40 dark:text-orange-400 px-2 py-0.5 rounded-lg text-xs"><?= count($pendingLoans) ?></span>
                         </h3>
-                        
+
                         <?php if (empty($pendingLoans)): ?>
                             <div class="bg-white dark:bg-gray-800 rounded-3xl p-8 border border-gray-100 dark:border-gray-700 text-center text-gray-500">
                                 <i data-lucide="check-circle" class="w-12 h-12 mx-auto mb-3 text-gray-300 dark:text-gray-600"></i>
@@ -200,7 +202,7 @@ $pendingLoans = $loan->getPending();
                                         </div>
                                         <span class="px-2 py-1 bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-xs font-semibold rounded-lg">Pending</span>
                                     </div>
-                                    
+
                                     <div class="space-y-2 mb-6 flex-1">
                                         <div class="flex justify-between text-sm">
                                             <span class="text-gray-500 dark:text-gray-400">Item:</span>
@@ -216,7 +218,7 @@ $pendingLoans = $loan->getPending();
                                         </div>
                                         <?php endif; ?>
                                     </div>
-                                    
+
                                     <div class="flex gap-2 mt-auto">
                                         <button @click='openApprovalModal(<?= json_encode($item) ?>)' class="flex-1 py-2 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 transition">Approve</button>
                                         <a href="?action=reject&id=<?= $item['id'] ?>" onclick="return confirm('Reject this request?')" class="px-4 py-2 bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400 rounded-xl font-medium hover:bg-red-200 dark:hover:bg-red-900/40 transition">Reject</a>
@@ -227,7 +229,7 @@ $pendingLoans = $loan->getPending();
                         <?php endif; ?>
                     </div>
 
-                    <!-- All Loans Table -->
+
                     <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
                         <div class="p-6 border-b border-gray-100 dark:border-gray-700">
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white">All Loans History</h3>
@@ -294,20 +296,20 @@ $pendingLoans = $loan->getPending();
                 </div>
             </main>
 
-            <!-- Approval Modal -->
+
             <div x-show="modalOpen" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="display: none;">
                 <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
                     <div x-show="modalOpen" x-transition.opacity class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" @click="modalOpen = false"></div>
                     <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-                    
+
                     <div x-show="modalOpen" x-transition.scale class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg w-full">
                         <form method="POST">
                             <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                 <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white mb-4" id="modal-title">Approve Loan</h3>
-                                
+
                                 <input type="hidden" name="loan_id" x-model="modalData.id">
                                 <input type="hidden" name="approve_loan" value="1">
-                                
+
                                 <div class="space-y-3">
                                     <div class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-2">
                                         <span class="text-gray-500 dark:text-gray-400">User</span>
@@ -321,13 +323,13 @@ $pendingLoans = $loan->getPending();
                                         <span class="text-gray-500 dark:text-gray-400">Borrowed On</span>
                                         <span class="font-medium text-gray-900 dark:text-white" x-text="modalData.date"></span>
                                     </div>
-                                    
+
                                     <div class="mt-4">
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                             Return Date Plan <span class="text-red-500">*</span>
                                         </label>
-                                        <input type="date" name="tanggal_kembali_rencana" required 
-                                               :min="modalData.minReturnDate" 
+                                        <input type="date" name="tanggal_kembali_rencana" required
+                                               :min="modalData.minReturnDate"
                                                x-model="modalData.defaultReturn"
                                                class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 outline-none">
                                         <p class="text-xs text-gray-500 mt-1">Specify when this item must be returned.</p>
@@ -349,10 +351,10 @@ $pendingLoans = $loan->getPending();
 
         </div>
     </div>
+
     
-    <!-- Initialize Lucide -->
     <script>lucide.createIcons();</script>
-    
+
     <?php include '../includes/chatbot-widget.php'; ?>
     <script src="../assets/js/chatbot.js"></script>
 </body>

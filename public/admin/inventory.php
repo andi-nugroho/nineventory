@@ -15,11 +15,11 @@ $isAdmin = $auth->isAdmin();
 $message = '';
 $error = '';
 
-// Handle actions
+
 if (isset($_GET['action'])) {
     $action = $_GET['action'];
     $id = $_GET['id'] ?? null;
-    
+
     if ($action === 'delete' && $id) {
         $result = $inventory->delete($id);
         if ($result['success']) {
@@ -30,7 +30,7 @@ if (isset($_GET['action'])) {
     }
 }
 
-// Handle form submission
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = [
         'nama_barang' => trim($_POST['nama_barang'] ?? ''),
@@ -40,15 +40,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'lokasi' => trim($_POST['lokasi'] ?? ''),
         'deskripsi' => trim($_POST['deskripsi'] ?? '')
     ];
-    
+
     if (isset($_POST['id']) && !empty($_POST['id'])) {
-        // Update
+
         $result = $inventory->update($_POST['id'], $data);
     } else {
-        // Create
+
         $result = $inventory->create($data);
     }
-    
+
     if ($result['success']) {
         $message = $result['message'];
     } else {
@@ -56,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Get all inventory
+
 $items = $inventory->getAll();
 ?>
 <!DOCTYPE html>
@@ -86,9 +86,11 @@ $items = $inventory->getAll();
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- Alpine.js -->
+
+
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- Lucide Icons -->
+
+
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         [x-cloak] { display: none !important; }
@@ -97,7 +99,7 @@ $items = $inventory->getAll();
     </style>
 </head>
 <body class="bg-gray-50 dark:bg-gray-900 font-sans text-slate-800 dark:text-white transition-colors duration-300"
-      x-data="{ 
+      x-data="{
           darkMode: localStorage.getItem('theme') === 'dark',
           toggleTheme() {
               this.darkMode = !this.darkMode;
@@ -110,50 +112,50 @@ $items = $inventory->getAll();
           }
       }"
       x-init="$watch('darkMode', val => val ? document.documentElement.classList.add('dark') : document.documentElement.classList.remove('dark')); if(darkMode) document.documentElement.classList.add('dark');">
-    
+
     <div class="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
-        
-        <!-- Animated Background Gradient -->
+
+
         <div class="fixed inset-0 -z-10 bg-gray-50 dark:bg-gray-950">
             <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-orange-500/10 blur-[100px] animate-pulse"></div>
             <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-red-500/10 blur-[100px] animate-pulse"></div>
         </div>
 
-        <?php 
+        <?php
         $activePage = 'inventory';
         $pathPrefix = '../';
-        include '../includes/sidebar.php'; 
+        include '../includes/sidebar.php';
         ?>
 
-        <!-- Main Content -->
+
         <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
-            
-            <?php 
+
+            <?php
             $pageTitle = 'Manage Inventory';
-            include '../includes/header.php'; 
+            include '../includes/header.php';
             ?>
 
             <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth hide-scrollbar">
                 <div class="max-w-7xl mx-auto space-y-6">
-                    
+
                     <?php if ($message): ?>
                         <div class="p-4 rounded-2xl bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 flex items-center gap-3">
                             <i data-lucide="check-circle" class="w-5 h-5"></i> <?= htmlspecialchars($message) ?>
                         </div>
                     <?php endif; ?>
-                    
+
                     <?php if ($error): ?>
                         <div class="p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 flex items-center gap-3">
                             <i data-lucide="alert-circle" class="w-5 h-5"></i> <?= htmlspecialchars($error) ?>
                         </div>
                     <?php endif; ?>
 
-                    <!-- Add Item Form -->
+
                     <div x-data="{ open: false }">
                         <button @click="open = !open" class="w-full md:w-auto px-4 py-2 bg-orange-600 text-white rounded-xl mb-4 flex items-center gap-2 hover:bg-orange-700 transition">
                             <i data-lucide="plus" class="w-4 h-4"></i> <span x-text="open ? 'Close Form' : 'Add New Item'"></span>
                         </button>
-                        
+
                         <div x-show="open" x-transition.origin.top class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm mb-8">
                             <div class="p-6 border-b border-gray-100 dark:border-gray-700">
                                 <h3 class="text-lg font-bold text-gray-900 dark:text-white">Add New Item</h3>
@@ -195,8 +197,8 @@ $items = $inventory->getAll();
                             </div>
                         </div>
                     </div>
-                
-                    <!-- Inventory List -->
+
+
                     <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
                         <div class="p-6 border-b border-gray-100 dark:border-gray-700">
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white">Inventory List</h3>
@@ -244,10 +246,10 @@ $items = $inventory->getAll();
             </main>
         </div>
     </div>
+
     
-    <!-- Initialize Lucide -->
     <script>lucide.createIcons();</script>
-    
+
     <?php include '../includes/chatbot-widget.php'; ?>
     <script src="../assets/js/chatbot.js"></script>
 </body>
