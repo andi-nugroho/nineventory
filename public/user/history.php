@@ -12,6 +12,30 @@ $loan = new Loan($pdo);
 $currentUser = $auth->getCurrentUser();
 $isAdmin = $auth->isAdmin();
 
+$message = '';
+$error = '';
+
+// Handle the return action
+if (isset($_GET['action']) && $_GET['action'] === 'mark_returned' && isset($_GET['id'])) {
+    $returnResult = $loan->markReturned($_GET['id']);
+    if ($returnResult['success']) {
+        // Redirect to clean the URL and show a success message
+        header("Location: history.php?success=returned");
+        exit;
+    } else {
+        $error = $returnResult['message'];
+    }
+}
+
+// Check for success messages from redirect
+if(isset($_GET['success']) && $_GET['success'] === 'returned') {
+    $message = 'Item successfully marked as returned.';
+}
+if(isset($_GET['loan_success'])) {
+    $message = 'Loan request submitted successfully!';
+}
+
+
 $myLoans = $loan->getByUserId($currentUser['id']);
 ?>
 <!DOCTYPE html>
@@ -68,7 +92,6 @@ $myLoans = $loan->getByUserId($currentUser['id']);
 
     <div class="flex h-screen overflow-hidden bg-gray-50 dark:bg-gray-950">
 
-
         <div class="fixed inset-0 -z-10 bg-gray-50 dark:bg-gray-950">
             <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-orange-500/10 blur-[100px] animate-pulse"></div>
             <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-red-500/10 blur-[100px] animate-pulse"></div>
@@ -80,7 +103,6 @@ $myLoans = $loan->getByUserId($currentUser['id']);
         include '../includes/sidebar.php';
         ?>
 
-
         <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
 
             <?php
@@ -90,6 +112,18 @@ $myLoans = $loan->getByUserId($currentUser['id']);
 
             <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth hide-scrollbar">
                 <div class="max-w-7xl mx-auto">
+
+                    <?php if ($message): ?>
+                        <div class="mb-4 p-4 rounded-2xl bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border border-green-200 dark:border-green-800 flex items-center gap-3">
+                            <i data-lucide="check-circle" class="w-5 h-5"></i> <?= htmlspecialchars($message) ?>
+                        </div>
+                    <?php endif; ?>
+                     <?php if ($error): ?>
+                        <div class="mb-4 p-4 rounded-2xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800 flex items-center gap-3">
+                            <i data-lucide="alert-circle" class="w-5 h-5"></i> <?= htmlspecialchars($error) ?>
+                        </div>
+                    <?php endif; ?>
+
                     <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
                         <div class="p-6 border-b border-gray-100 dark:border-gray-700 flex justify-between items-center">
                             <h3 class="text-lg font-bold text-gray-900 dark:text-white">My Loans</h3>
@@ -109,10 +143,8 @@ $myLoans = $loan->getByUserId($currentUser['id']);
                                             <th class="px-6 py-4 font-semibold">Request ID</th>
                                             <th class="px-6 py-4 font-semibold">For Employee</th>
                                             <th class="px-6 py-4 font-semibold">Items</th>
-                                            <th class="px-6 py-4 font-semibold">Borrowed Date</th>
-                                            <th class="px-6 py-4 font-semibold">Return Date</th>
                                             <th class="px-6 py-4 font-semibold">Status</th>
-                                            <th class="px-6 py-4 font-semibold">Notes</th>
+                                            <th class="px-6 py-4 font-semibold text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -127,14 +159,16 @@ $myLoans = $loan->getByUserId($currentUser['id']);
                                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                                 <ul class="list-disc pl-5 space-y-1">
                                                     <?php foreach ($item['details'] as $detail): ?>
-                                                        <li><?= htmlspecialchars($detail['nama_barang']) ?> <span class="text-xs">(x<?= $detail['jumlah'] ?>)</span></li>
+                                                        <li>
+                                                            <a href="detail.php?id=<?= $detail['inventaris_id'] ?>" class="hover:text-orange-500 hover:underline">
+                                                                <?= htmlspecialchars($detail['nama_barang']) ?>
+                                                            </a>
+                                                            <span class="text-xs">(x<?= $detail['jumlah'] ?>)</span>
+                                                        </li>
                                                     <?php endforeach; ?>
                                                 </ul>
                                             </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= date('M d, Y', strtotime($item['tanggal_pinjam'])) ?></td>
-                                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= $item['tanggal_kembali'] ? date('M d, Y', strtotime($item['tanggal_kembali'])) : '-' ?></td>
                                             <td class="px-6 py-4">
-
                                                 <?php
                                                 $statusColor = match($item['status']) {
                                                     'approved' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
@@ -144,23 +178,21 @@ $myLoans = $loan->getByUserId($currentUser['id']);
                                                     default => 'bg-gray-100 text-gray-700'
                                                 };
                                                 ?>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="px-2 py-1 rounded-lg text-xs font-semibold <?= $statusColor ?>">
-                                                        <?= ucfirst($item['status']) ?>
-                                                    </span>
-                                                    <?php if (in_array($item['status'], ['approved', 'returned'])): ?>
-                                                        <a href="<?= $pathPrefix ?>print_loan.php?id=<?= $item['id'] ?>" target="_blank" class="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Export to PDF">
-                                                            <i data-lucide="printer" class="w-4 h-4"></i>
-                                                        </a>
-                                                    <?php endif; ?>
-                                                </div>
+                                                <span class="px-2 py-1 rounded-lg text-xs font-semibold <?= $statusColor ?>">
+                                                    <?= ucfirst($item['status']) ?>
+                                                </span>
                                             </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                                <?php if ($item['status'] === 'rejected' && $item['alasan_reject']): ?>
-                                                    <span class="text-red-500 dark:text-red-400">Reason: <?= htmlspecialchars($item['alasan_reject']) ?></span>
-                                                <?php else: ?>
-                                                    <?= htmlspecialchars($item['keterangan'] ?? '-') ?>
+                                            <td class="px-6 py-4 text-right">
+                                                <?php if ($item['status'] === 'approved'): ?>
+                                                    <a href="?action=mark_returned&id=<?= $item['id'] ?>" 
+                                                       onclick="return confirm('Are you sure you want to mark this loan as returned? This action cannot be undone.')" 
+                                                       class="px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 rounded-lg text-xs font-semibold hover:bg-blue-200 transition">
+                                                        Mark as Returned
+                                                    </a>
                                                 <?php endif; ?>
+                                                <a href="<?= $pathPrefix ?>print_loan.php?id=<?= $item['id'] ?>" target="_blank" class="inline-block p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Export to PDF">
+                                                    <i data-lucide="printer" class="w-4 h-4"></i>
+                                                </a>
                                             </td>
                                         </tr>
                                         <?php endforeach; ?>
@@ -174,19 +206,11 @@ $myLoans = $loan->getByUserId($currentUser['id']);
         </div>
     </div>
 
-
     <script>lucide.createIcons();</script>
-
-    <?php include '../includes/chatbot-widget.php'; ?>
-    <script src="../assets/js/chatbot.js"></script>
     <script>
         document.addEventListener('alpine:init', () => {
              const urlParams = new URLSearchParams(window.location.search);
-             if (urlParams.has('loan_success')) {
-                 if (Alpine.store('cart')) {
-                     Alpine.store('cart').clear();
-                 }
-                 // Remove param from URL without refresh
+             if (urlParams.has('loan_success') || urlParams.has('success')) {
                  const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
                  window.history.replaceState({path:newUrl},'',newUrl);
              }

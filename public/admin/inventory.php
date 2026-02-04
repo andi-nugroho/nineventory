@@ -14,8 +14,10 @@ $isAdmin = $auth->isAdmin();
 
 $message = '';
 $error = '';
+$itemToEdit = null;
+$isEditMode = false;
 
-
+// Handle Actions (Delete, Edit)
 if (isset($_GET['action'])) {
     $action = $_GET['action'];
     $id = $_GET['id'] ?? null;
@@ -23,9 +25,17 @@ if (isset($_GET['action'])) {
     if ($action === 'delete' && $id) {
         $result = $inventory->delete($id);
         if ($result['success']) {
-            $message = $result['message'];
+            header("Location: inventory.php?message=deleted");
+            exit;
         } else {
             $error = $result['message'];
+        }
+    } elseif ($action === 'edit' && $id) {
+        $itemToEdit = $inventory->getById($id);
+        if ($itemToEdit) {
+            $isEditMode = true;
+        } else {
+            $error = "Item not found for editing.";
         }
     }
 }
@@ -42,17 +52,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     if (isset($_POST['id']) && !empty($_POST['id'])) {
-
+        // Update existing item
         $result = $inventory->update($_POST['id'], $data);
+        if ($result['success']) {
+             header("Location: inventory.php?message=updated");
+             exit;
+        }
     } else {
-
+        // Create new item
         $result = $inventory->create($data);
+         if ($result['success']) {
+             header("Location: inventory.php?message=created");
+             exit;
+        }
     }
 
-    if ($result['success']) {
-        $message = $result['message'];
-    } else {
+    if (!$result['success']) {
         $error = $result['message'];
+        // If there was an error, retain posted data to refill the form
+        $itemToEdit = array_merge(['id' => $_POST['id'] ?? null], $data);
+        $isEditMode = isset($_POST['id']) && !empty($_POST['id']);
+    }
+}
+
+if (isset($_GET['message'])) {
+    $msg_key = $_GET['message'];
+    $messages = [
+        'deleted' => 'Item has been deleted successfully.',
+        'updated' => 'Item has been updated successfully.',
+        'created' => 'New item has been added successfully.'
+    ];
+    if(array_key_exists($msg_key, $messages)) {
+        $message = $messages[$msg_key];
     }
 }
 
@@ -151,53 +182,60 @@ $items = $inventory->getAll();
                     <?php endif; ?>
 
 
-                    <div x-data="{ open: false }">
+                    <div x-data="{ open: <?= $isEditMode ? 'true' : 'false' ?> }">
                         <button @click="open = !open" class="w-full md:w-auto px-4 py-2 bg-orange-600 text-white rounded-xl mb-4 flex items-center gap-2 hover:bg-orange-700 transition">
                             <i data-lucide="plus" class="w-4 h-4"></i> <span x-text="open ? 'Close Form' : 'Add New Item'"></span>
                         </button>
 
-                        <div x-show="open" x-transition.origin.top class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm mb-8">
+                        <div x-show="open" x-transition.origin.top class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm mb-8" id="item-form">
                             <div class="p-6 border-b border-gray-100 dark:border-gray-700">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Add New Item</h3>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white"><?= $isEditMode ? 'Edit Item' : 'Add New Item' ?></h3>
                             </div>
                             <div class="p-6">
-                                <form method="POST" class="space-y-4">
+                                <form method="POST" action="inventory.php#item-form" class="space-y-4">
+                                    <?php if ($isEditMode && $itemToEdit): ?>
+                                        <input type="hidden" name="id" value="<?= htmlspecialchars($itemToEdit['id']) ?>">
+                                    <?php endif; ?>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Item Name</label>
-                                            <input type="text" name="nama_barang" required class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
+                                            <input type="text" name="nama_barang" required value="<?= htmlspecialchars($itemToEdit['nama_barang'] ?? '') ?>" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
-                                            <input type="text" name="kategori" required class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
+                                            <input type="text" name="kategori" required value="<?= htmlspecialchars($itemToEdit['kategori'] ?? '') ?>" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Total Stock</label>
-                                            <input type="number" name="stok_total" min="0" required class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
+                                            <input type="number" name="stok_total" min="0" required value="<?= htmlspecialchars($itemToEdit['stok_total'] ?? '0') ?>" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Condition</label>
                                             <select name="kondisi" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
-                                                <option value="baik">Good (Baik)</option>
-                                                <option value="rusak ringan">Minor Damage (Rusak Ringan)</option>
-                                                <option value="rusak berat">Major Damage (Rusak Berat)</option>
+                                                <option value="baik" <?= ($itemToEdit['kondisi'] ?? 'baik') === 'baik' ? 'selected' : '' ?>>Good (Baik)</option>
+                                                <option value="rusak ringan" <?= ($itemToEdit['kondisi'] ?? '') === 'rusak ringan' ? 'selected' : '' ?>>Minor Damage (Rusak Ringan)</option>
+                                                <option value="rusak berat" <?= ($itemToEdit['kondisi'] ?? '') === 'rusak berat' ? 'selected' : '' ?>>Major Damage (Rusak Berat)</option>
                                             </select>
                                         </div>
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
-                                            <input type="text" name="lokasi" required class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
+                                            <input type="text" name="lokasi" required value="<?= htmlspecialchars($itemToEdit['lokasi'] ?? '') ?>" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
                                         </div>
                                         <div class="col-span-full">
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
-                                            <textarea name="deskripsi" rows="2" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none"></textarea>
+                                            <textarea name="deskripsi" rows="2" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none"><?= htmlspecialchars($itemToEdit['deskripsi'] ?? '') ?></textarea>
                                         </div>
                                     </div>
-                                    <button type="submit" class="px-6 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium rounded-xl hover:opacity-90 transition">Save Item</button>
+                                    <div class="flex items-center gap-4">
+                                        <button type="submit" class="px-6 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-medium rounded-xl hover:opacity-90 transition">Save Item</button>
+                                        <?php if($isEditMode): ?>
+                                            <a href="inventory.php" class="text-sm text-gray-500 hover:underline">Cancel Edit</a>
+                                        <?php endif; ?>
+                                    </div>
                                 </form>
                             </div>
                         </div>
                     </div>
-
 
                     <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden shadow-sm">
                         <div class="p-6 border-b border-gray-100 dark:border-gray-700">
@@ -209,7 +247,7 @@ $items = $inventory->getAll();
                                     <tr>
                                         <th class="px-6 py-4 font-semibold">Item Name</th>
                                         <th class="px-6 py-4 font-semibold">Category</th>
-                                        <th class="px-6 py-4 font-semibold">Stock (Total/Avail)</th>
+                                        <th class="px-6 py-4 font-semibold">Stock (Avail/Total)</th>
                                         <th class="px-6 py-4 font-semibold">Condition</th>
                                         <th class="px-6 py-4 font-semibold">Location</th>
                                         <th class="px-6 py-4 font-semibold text-right">Actions</th>
@@ -221,9 +259,9 @@ $items = $inventory->getAll();
                                         <td class="px-6 py-4 font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($item['nama_barang']) ?></td>
                                         <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= htmlspecialchars($item['kategori']) ?></td>
                                         <td class="px-6 py-4 text-sm">
-                                            <span class="font-bold text-gray-900 dark:text-gray-200"><?= $item['stok_total'] ?></span>
-                                            <span class="text-gray-400 mx-1">/</span>
                                             <span class="<?= $item['stok_tersedia'] > 0 ? 'text-green-600' : 'text-red-500' ?>"><?= $item['stok_tersedia'] ?></span>
+                                            <span class="text-gray-400 mx-1">/</span>
+                                            <span class="font-bold text-gray-900 dark:text-gray-200"><?= $item['stok_total'] ?></span>
                                         </td>
                                         <td class="px-6 py-4">
                                             <span class="px-2 py-1 rounded-lg text-xs font-semibold <?= $item['kondisi'] === 'baik' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' ?>">
@@ -231,8 +269,11 @@ $items = $inventory->getAll();
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= htmlspecialchars($item['lokasi']) ?></td>
-                                        <td class="px-6 py-4 text-right">
-                                            <a href="?action=delete&id=<?= $item['id'] ?>" onclick="return confirm('Delete this item?')" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                                        <td class="px-6 py-4 text-right flex items-center justify-end gap-2">
+                                            <a href="?action=edit&id=<?= $item['id'] ?>#item-form" class="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors" title="Edit">
+                                                <i data-lucide="edit" class="w-4 h-4"></i>
+                                            </a>
+                                            <a href="?action=delete&id=<?= $item['id'] ?>" onclick="return confirm('Delete this item? This action cannot be undone.')" class="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors" title="Delete">
                                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                                             </a>
                                         </td>

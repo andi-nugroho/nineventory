@@ -157,15 +157,7 @@ class Loan
 
             foreach ($loans as &$loan) {
                 $stmtDetails->execute([$loan['id']]);
-                $details = $stmtDetails->fetchAll();
-                $loan['details'] = $details;
-
-                error_log("Loan ID: " . $loan['id'] . " - Details: " . print_r($details, true)); // Debug
-                
-                // Create a summary of item names
-                $itemNames = array_column($details, 'nama_barang');
-                error_log("Loan ID: " . $loan['id'] . " - Item Names: " . print_r($itemNames, true)); // Debug
-                $loan['items_summary'] = implode(', ', $itemNames);
+                $loan['details'] = $stmtDetails->fetchAll();
             }
 
             return $loans;
@@ -386,15 +378,7 @@ class Loan
 
             foreach ($loans as &$loan) {
                 $stmtDetails->execute([$loan['id']]);
-                $details = $stmtDetails->fetchAll();
-                $loan['details'] = $details;
-
-                error_log("Loan ID: " . $loan['id'] . " - Details: " . print_r($details, true)); // Debug
-                
-                // Create a summary of item names
-                $itemNames = array_column($details, 'nama_barang');
-                error_log("Loan ID: " . $loan['id'] . " - Item Names: " . print_r($itemNames, true)); // Debug
-                $loan['items_summary'] = implode(', ', $itemNames);
+                $loan['details'] = $stmtDetails->fetchAll();
             }
 
             return $loans;

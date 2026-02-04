@@ -21,7 +21,8 @@ if (isset($_GET['action']) && isset($_GET['id'])) {
     $id = $_GET['id'];
 
     if ($action === 'reject') {
-        $result = $loan->reject($id, 'Ditolak oleh admin');
+        $reason = $_GET['reason'] ?? 'Ditolak oleh admin';
+        $result = $loan->reject($id, $reason);
         if ($result['success']) {
             $message = $result['message'];
         } else {
@@ -230,7 +231,7 @@ $pendingLoans = $loan->getPending();
 
                                     <div class="flex gap-2 mt-auto">
                                         <button @click='openApprovalModal(<?= json_encode($item) ?>)' class="flex-1 py-2 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 transition">Approve</button>
-                                        <a href="?action=reject&id=<?= $item['id'] ?>" onclick="return confirm('Reject this request?')" class="px-4 py-2 bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400 rounded-xl font-medium hover:bg-red-200 dark:hover:bg-red-900/40 transition">Reject</a>
+                                        <a href="#" onclick="const reason = prompt('Please enter a reason for rejection:', 'Stok tidak tersedia'); if (reason) { window.location.href = '?action=reject&id=<?= $item['id'] ?>&reason=' + encodeURIComponent(reason); } return false;" class="px-4 py-2 bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400 rounded-xl font-medium hover:bg-red-200 dark:hover:bg-red-900/40 transition">Reject</a>
                                     </div>
                                 </div>
                                 <?php endforeach; ?>
@@ -269,7 +270,7 @@ $pendingLoans = $loan->getPending();
                                         <td class="px-6 py-4">
                                             <?php if ($item['tanggal_kembali_rencana']): ?>
                                                 <span class="px-2 py-1 bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400 rounded-lg text-xs font-medium">
-                                                    <?= date('M d', strtotime($item['tanggal_kembali_rencana'])) ?>
+                                                    <?= date('M d, Y', strtotime($item['tanggal_kembali_rencana'])) ?>
                                                 </span>
                                             <?php else: ?>
                                                 <span class="text-gray-300">-</span>
@@ -280,6 +281,17 @@ $pendingLoans = $loan->getPending();
                                         </td>
                                         <td class="px-6 py-4">
                                             <?php
+                                            $isOverdue = false;
+                                            if ($item['status'] === 'approved' && $item['tanggal_kembali_rencana']) {
+                                                try {
+                                                    $dueDate = new DateTime($item['tanggal_kembali_rencana']);
+                                                    $today = new DateTime('today');
+                                                    if ($dueDate < $today) {
+                                                        $isOverdue = true;
+                                                    }
+                                                } catch (Exception $e) { /* Ignore date parsing errors */ }
+                                            }
+
                                             $statusColor = match($item['status']) {
                                                 'approved' => 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
                                                 'pending' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
@@ -288,9 +300,16 @@ $pendingLoans = $loan->getPending();
                                                 default => 'bg-gray-100 text-gray-700'
                                             };
                                             ?>
-                                            <span class="px-2 py-1 rounded-lg text-xs font-semibold <?= $statusColor ?>">
-                                                <?= ucfirst($item['status']) ?>
-                                            </span>
+                                            <div class="flex flex-col gap-1 items-start">
+                                                <span class="px-2 py-1 rounded-lg text-xs font-semibold <?= $statusColor ?>">
+                                                    <?= ucfirst($item['status']) ?>
+                                                </span>
+                                                <?php if ($isOverdue): ?>
+                                                    <span class="px-2 py-1 rounded-lg text-xs font-semibold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" title="This loan is overdue!">
+                                                        Overdue
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
                                         </td>
                                         <td class="px-6 py-4 text-right">
                                             <?php if ($item['status'] === 'approved'): ?>
