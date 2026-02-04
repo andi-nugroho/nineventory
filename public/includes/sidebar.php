@@ -60,7 +60,7 @@ $pathPrefix = $pathPrefix ?? './';
                     <i data-lucide="search" class="w-5 h-5 text-neutral-700 dark:text-neutral-200"></i>
                     <span class="text-neutral-700 dark:text-neutral-200 text-sm font-medium">Browse Inventory</span>
                 </a>
-                <?php if (!$isAdmin): ?>
+                <?php if (empty($isAdmin)): ?>
                 <a href="<?= $pathPrefix ?>user/request.php" class="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors <?= $activePage === 'request' ? 'bg-neutral-100 dark:bg-neutral-800' : '' ?>">
                     <i data-lucide="plus-circle" class="w-5 h-5 text-neutral-700 dark:text-neutral-200"></i>
                     <span class="text-neutral-700 dark:text-neutral-200 text-sm font-medium">New Request</span>
@@ -141,7 +141,7 @@ $pathPrefix = $pathPrefix ?? './';
                           style="display: none;">Browse Inventory</span>
                 </a>
 
-                <?php if (!$isAdmin): ?>
+                <?php if (empty($isAdmin)): ?>
                 <a href="<?= $pathPrefix ?>user/request.php" class="flex items-center justify-start gap-3 group/sidebar p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700/50 transition-colors <?= $activePage === 'request' ? 'bg-neutral-200 dark:bg-neutral-700' : '' ?>">
                     <i data-lucide="plus-circle" class="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0"></i>
                     <span x-show="open"

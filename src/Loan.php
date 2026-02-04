@@ -378,7 +378,12 @@ class Loan
 
             foreach ($loans as &$loan) {
                 $stmtDetails->execute([$loan['id']]);
-                $loan['details'] = $stmtDetails->fetchAll();
+                $details = $stmtDetails->fetchAll();
+                $loan['details'] = $details;
+                
+                // Create a summary of item names for the dashboard
+                $itemNames = array_column($details, 'nama_barang');
+                $loan['items_summary'] = implode(', ', $itemNames);
             }
 
             return $loans;
@@ -402,6 +407,69 @@ class Loan
             );
             $stmt->bindValue(1, $limit, \PDO::PARAM_INT);
             $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (\PDOException $e) {
+            return [];
+        }
+    }
+
+    public function getOverdueLoans()
+    {
+        try {
+            $stmt = $this->pdo->query(
+                "SELECT p.*, u.username, e.nama_karyawan
+                 FROM peminjaman p
+                 JOIN users u ON p.user_id = u.id
+                 LEFT JOIN employees e ON p.employee_id = e.id
+                 WHERE p.status = 'approved' AND p.tanggal_kembali_rencana < CURDATE()"
+            );
+            $loans = $stmt->fetchAll();
+            $stmtDetails = $this->pdo->prepare(
+                "SELECT pd.jumlah, i.nama_barang 
+                 FROM peminjaman_detail pd
+                 JOIN inventaris i ON pd.inventaris_id = i.id
+                 WHERE pd.peminjaman_id = ?"
+            );
+            foreach ($loans as &$loan) {
+                $stmtDetails->execute([$loan['id']]);
+                $loan['details'] = $stmtDetails->fetchAll();
+            }
+            return $loans;
+        } catch (\PDOException $e) {
+            return [];
+        }
+    }
+
+    public function getTopBorrowers($limit = 5)
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                "SELECT u.username, COUNT(p.id) as total_loans
+                 FROM peminjaman p
+                 JOIN users u ON p.user_id = u.id
+                 GROUP BY u.id, u.username
+                 ORDER BY total_loans DESC
+                 LIMIT ?"
+            );
+            $stmt->bindValue(1, $limit, \PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll();
+        } catch (\PDOException $e) {
+            return [];
+        }
+    }
+
+    public function getCategoryBreakdown()
+    {
+        try {
+            $stmt = $this->pdo->query(
+                "SELECT i.kategori, COUNT(p.id) as total_loans
+                 FROM peminjaman p
+                 JOIN peminjaman_detail pd ON p.id = pd.peminjaman_id
+                 JOIN inventaris i ON pd.inventaris_id = i.id
+                 GROUP BY i.kategori
+                 ORDER BY total_loans DESC"
+            );
             return $stmt->fetchAll();
         } catch (\PDOException $e) {
             return [];

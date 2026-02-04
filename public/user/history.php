@@ -151,7 +151,9 @@ $myLoans = $loan->getByUserId($currentUser['id']);
                                         <?php foreach ($myLoans as $item): ?>
                                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
                                             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
-                                                <?= htmlspecialchars($item['kode_peminjaman'] ?? 'LOAN-'.$item['id']) ?>
+                                                <a href="loan_detail.php?id=<?= $item['id'] ?>" class="hover:text-orange-500 hover:underline">
+                                                    <?= htmlspecialchars($item['kode_peminjaman'] ?? 'LOAN-'.$item['id']) ?>
+                                                </a>
                                             </td>
                                             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
                                                 <?= htmlspecialchars($item['nama_karyawan'] ?? '-') ?>
@@ -183,6 +185,9 @@ $myLoans = $loan->getByUserId($currentUser['id']);
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 text-right">
+                                                <a href="loan_detail.php?id=<?= $item['id'] ?>" class="inline-block px-3 py-1 bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-200 rounded-lg text-xs font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition" title="View Details">
+                                                    View Details
+                                                </a>
                                                 <?php if ($item['status'] === 'approved'): ?>
                                                     <a href="?action=mark_returned&id=<?= $item['id'] ?>" 
                                                        onclick="return confirm('Are you sure you want to mark this loan as returned? This action cannot be undone.')" 
