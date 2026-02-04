@@ -107,6 +107,7 @@ $activities = $loan->getAll();
                                             <th class="px-6 py-4 font-semibold">Items</th>
                                             <th class="px-6 py-4 font-semibold">Date</th>
                                             <th class="px-6 py-4 font-semibold">Status</th>
+                                            <th class="px-6 py-4 font-semibold text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
@@ -122,8 +123,12 @@ $activities = $loan->getAll();
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-sm truncate" title="<?= htmlspecialchars($item['items_summary'] ?? '') ?>">
-                                                <?= htmlspecialchars($item['items_summary'] ?? '') ?>
+                                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                                <ul class="list-disc pl-4 space-y-1">
+                                                <?php foreach($item['details'] as $detail): ?>
+                                                    <li><?= htmlspecialchars($detail['nama_barang']) ?> <span class="text-xs">(x<?= $detail['jumlah'] ?>)</span></li>
+                                                <?php endforeach; ?>
+                                                </ul>
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                                 <?= date('M d, Y', strtotime($item['tanggal_pinjam'])) ?>
@@ -143,12 +148,12 @@ $activities = $loan->getAll();
                                                     <span class="px-2 py-1 rounded-lg text-xs font-semibold <?= $statusColor ?>">
                                                         <?= ucfirst($item['status']) ?>
                                                     </span>
-                                                    <?php if (in_array($item['status'], ['approved', 'returned'])): ?>
-                                                        <a href="<?= $pathPrefix ?>print_loan.php?id=<?= $item['id'] ?>" target="_blank" class="p-1 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition" title="Print Proof">
-                                                            <i data-lucide="printer" class="w-4 h-4"></i>
-                                                        </a>
-                                                    <?php endif; ?>
                                                 </div>
+                                            </td>
+                                            <td class="px-6 py-4 text-right">
+                                                 <a href="loan_detail.php?id=<?= $item['id'] ?>" class="p-2 text-gray-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors" title="View Details">
+                                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                                </a>
                                             </td>
                                         </tr>
                                         <?php endforeach; ?>
