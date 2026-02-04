@@ -19,7 +19,7 @@ class Loan
      * @param string $tanggal_pinjam
      * @param string|null $keterangan
      */
-    public function create($user_id, $items, $tanggal_pinjam, $keterangan = null)
+    public function create($user_id, $employee_id, $items, $tanggal_pinjam, $keterangan = null)
     {
         try {
             $this->pdo->beginTransaction();
@@ -29,10 +29,10 @@ class Loan
 
             
             $stmt = $this->pdo->prepare(
-                "INSERT INTO peminjaman (kode_peminjaman, user_id, tanggal_pinjam, keterangan, status)
-                 VALUES (?, ?, ?, ?, 'pending')"
+                "INSERT INTO peminjaman (kode_peminjaman, user_id, employee_id, tanggal_pinjam, keterangan, status)
+                 VALUES (?, ?, ?, ?, ?, 'pending')"
             );
-            $stmt->execute([$kode_peminjaman, $user_id, $tanggal_pinjam, $keterangan]);
+            $stmt->execute([$kode_peminjaman, $user_id, $employee_id, $tanggal_pinjam, $keterangan]);
             $peminjaman_id = $this->pdo->lastInsertId();
 
             
@@ -42,7 +42,11 @@ class Loan
             );
 
             foreach ($items as $item) {
-                
+                // Defensive check to ensure the required key exists
+                if (!isset($item['inventaris_id'])) {
+                    throw new \Exception("Data item tidak lengkap: 'inventaris_id' tidak ditemukan.");
+                }
+
                 $inv = $this->inventory->getById($item['inventaris_id']);
                 if (!$inv) {
                      throw new \Exception("Barang dengan ID " . $item['inventaris_id'] . " tidak ditemukan.");
@@ -73,21 +77,29 @@ class Loan
     public function getByUserId($user_id)
     {
         try {
-            
-            
             $stmt = $this->pdo->prepare(
-                "SELECT p.*,
-                 (SELECT COUNT(*) FROM peminjaman_detail WHERE peminjaman_id = p.id) as total_items,
-                 (SELECT GROUP_CONCAT(CONCAT(i.nama_barang, ' (', pd.jumlah, ')') SEPARATOR ', ')
-                  FROM peminjaman_detail pd
-                  JOIN inventaris i ON pd.inventaris_id = i.id
-                  WHERE pd.peminjaman_id = p.id) as items_summary
+                "SELECT p.*, e.nama_karyawan
                  FROM peminjaman p
+                 LEFT JOIN employees e ON p.employee_id = e.id
                  WHERE p.user_id = ?
                  ORDER BY p.created_at DESC"
             );
             $stmt->execute([$user_id]);
-            return $stmt->fetchAll();
+            $loans = $stmt->fetchAll();
+
+            $stmtDetails = $this->pdo->prepare(
+                "SELECT pd.*, i.nama_barang, i.kategori
+                 FROM peminjaman_detail pd
+                 JOIN inventaris i ON pd.inventaris_id = i.id
+                 WHERE pd.peminjaman_id = ?"
+            );
+
+            foreach ($loans as &$loan) {
+                $stmtDetails->execute([$loan['id']]);
+                $loan['details'] = $stmtDetails->fetchAll();
+            }
+
+            return $loans;
         } catch (\PDOException $e) {
             return [];
         }
@@ -97,18 +109,28 @@ class Loan
     {
         try {
             $stmt = $this->pdo->query(
-                "SELECT p.*, u.username, u.email,
-                 (SELECT COUNT(*) FROM peminjaman_detail WHERE peminjaman_id = p.id) as total_items,
-                 (SELECT GROUP_CONCAT(CONCAT(i.nama_barang, ' (', pd.jumlah, ')') SEPARATOR ', ')
-                  FROM peminjaman_detail pd
-                  JOIN inventaris i ON pd.inventaris_id = i.id
-                  WHERE pd.peminjaman_id = p.id) as items_summary
+                "SELECT p.*, u.username, u.email, e.nama_karyawan
                  FROM peminjaman p
                  JOIN users u ON p.user_id = u.id
+                 LEFT JOIN employees e ON p.employee_id = e.id
                  WHERE p.status = 'pending'
                  ORDER BY p.created_at ASC"
             );
-            return $stmt->fetchAll();
+            $loans = $stmt->fetchAll();
+
+            $stmtDetails = $this->pdo->prepare(
+                "SELECT pd.*, i.nama_barang, i.kategori
+                 FROM peminjaman_detail pd
+                 JOIN inventaris i ON pd.inventaris_id = i.id
+                 WHERE pd.peminjaman_id = ?"
+            );
+
+            foreach ($loans as &$loan) {
+                $stmtDetails->execute([$loan['id']]);
+                $loan['details'] = $stmtDetails->fetchAll();
+            }
+
+            return $loans;
         } catch (\PDOException $e) {
             return [];
         }
@@ -118,17 +140,27 @@ class Loan
     {
         try {
             $stmt = $this->pdo->query(
-                "SELECT p.*, u.username, u.email,
-                 (SELECT COUNT(*) FROM peminjaman_detail WHERE peminjaman_id = p.id) as total_items,
-                 (SELECT GROUP_CONCAT(CONCAT(i.nama_barang, ' (', pd.jumlah, ')') SEPARATOR ', ')
-                  FROM peminjaman_detail pd
-                  JOIN inventaris i ON pd.inventaris_id = i.id
-                  WHERE pd.peminjaman_id = p.id) as items_summary
+                "SELECT p.*, u.username, u.email, e.nama_karyawan
                  FROM peminjaman p
                  JOIN users u ON p.user_id = u.id
+                 LEFT JOIN employees e ON p.employee_id = e.id
                  ORDER BY p.created_at DESC"
             );
-            return $stmt->fetchAll();
+            $loans = $stmt->fetchAll();
+
+            $stmtDetails = $this->pdo->prepare(
+                "SELECT pd.*, i.nama_barang, i.kategori
+                 FROM peminjaman_detail pd
+                 JOIN inventaris i ON pd.inventaris_id = i.id
+                 WHERE pd.peminjaman_id = ?"
+            );
+
+            foreach ($loans as &$loan) {
+                $stmtDetails->execute([$loan['id']]);
+                $loan['details'] = $stmtDetails->fetchAll();
+            }
+
+            return $loans;
         } catch (\PDOException $e) {
             return [];
         }
@@ -139,9 +171,10 @@ class Loan
         try {
             
             $stmt = $this->pdo->prepare(
-                "SELECT p.*, u.username, u.email
+                "SELECT p.*, u.username, u.email, e.nama_karyawan
                  FROM peminjaman p
                  JOIN users u ON p.user_id = u.id
+                 LEFT JOIN employees e ON p.employee_id = e.id
                  WHERE p.id = ?"
             );
             $stmt->execute([$id]);
@@ -325,19 +358,35 @@ class Loan
     {
         try {
             $stmt = $this->pdo->prepare(
-                "SELECT p.*, u.username,
-                 (SELECT GROUP_CONCAT(CONCAT(i.nama_barang, ' (', pd.jumlah, ')') SEPARATOR ', ')
-                  FROM peminjaman_detail pd
-                  JOIN inventaris i ON pd.inventaris_id = i.id
-                  WHERE pd.peminjaman_id = p.id) as items_summary
+                "SELECT p.*, u.username, e.nama_karyawan
                  FROM peminjaman p
                  JOIN users u ON p.user_id = u.id
+                 LEFT JOIN employees e ON p.employee_id = e.id
                  ORDER BY p.created_at DESC
                  LIMIT ?"
             );
             $stmt->bindValue(1, $limit, \PDO::PARAM_INT);
             $stmt->execute();
-            return $stmt->fetchAll();
+            $loans = $stmt->fetchAll();
+
+            $stmtDetails = $this->pdo->prepare(
+                "SELECT pd.*, i.nama_barang, i.kategori
+                 FROM peminjaman_detail pd
+                 JOIN inventaris i ON pd.inventaris_id = i.id
+                 WHERE pd.peminjaman_id = ?"
+            );
+
+            foreach ($loans as &$loan) {
+                $stmtDetails->execute([$loan['id']]);
+                $details = $stmtDetails->fetchAll();
+                $loan['details'] = $details;
+
+                // Create a summary of item names
+                $itemNames = array_column($details, 'nama_barang');
+                $loan['items_summary'] = implode(', ', $itemNames);
+            }
+
+            return $loans;
         } catch (\PDOException $e) {
             return [];
         }

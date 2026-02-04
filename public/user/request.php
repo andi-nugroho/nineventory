@@ -5,12 +5,14 @@ require_once __DIR__ . '/../../config/database.php';
 use Nineventory\Auth;
 use Nineventory\Inventory;
 use Nineventory\Loan;
+use Nineventory\Employee; // Added this line
 
 $auth = new Auth($pdo);
 $auth->requireLogin();
 
 $inventory = new Inventory($pdo);
 $loan = new Loan($pdo);
+$employee = new Employee($pdo); // Instantiate Employee class
 $currentUser = $auth->getCurrentUser();
 $isAdmin = $auth->isAdmin();
 
@@ -23,11 +25,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $itemsJson = $_POST['items_json'] ?? '[]';
     $tanggal_pinjam = $_POST['tanggal_pinjam'] ?? '';
     $keterangan = trim($_POST['keterangan'] ?? '');
+    
+    // Determine the employee_id based on the current logged-in user
+    $linkedEmployee = null;
+    $employee_id = null;
+    if ($currentUser) {
+        // Assuming there's a method to get employee by user ID
+        $stmt = $pdo->prepare("SELECT id FROM employees WHERE user_id = ?");
+        $stmt->execute([$currentUser['id']]);
+        $linkedEmployee = $stmt->fetch();
+        if ($linkedEmployee) {
+            $employee_id = $linkedEmployee['id'];
+        }
+    }
 
     $items = json_decode($itemsJson, true);
 
     if (!empty($items) && is_array($items) && $tanggal_pinjam) {
-        $result = $loan->create($currentUser['id'], $items, $tanggal_pinjam, $keterangan);
+        $result = $loan->create($currentUser['id'], $employee_id, $items, $tanggal_pinjam, $keterangan);
 
         if ($result['success']) {
             $message = $result['message'];
@@ -124,7 +139,7 @@ $selectedItemId = intval($_GET['item_id'] ?? 0);
             ?>
 
             <main class="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth hide-scrollbar"
-                  x-data="loanRequestApp(<?= htmlspecialchars(json_encode($availableItems)) ?>, <?= $selectedItemId ?>)">
+                  x-data="masterDetailLoanRequest(<?= htmlspecialchars(json_encode($availableItems)) ?>)">
                 <div class="max-w-4xl mx-auto">
 
                     <?php if ($message): ?>
@@ -167,8 +182,8 @@ $selectedItemId = intval($_GET['item_id'] ?? 0);
                                         </select>
                                     </div>
                                     <div class="md:col-span-2">
-                                        <label class="block text-sm text-gray-500 dark:text-gray-400 mb-1">Qty</label>
-                                        <input type="number" x-model.number="currentQty" min="1" :max="currentMaxStock"
+                                        <label class="block text-sm text-gray-500 dark:text-gray-400 mb-1">Jumlah</label>
+                                        <input type="number" x-model.number="currentJumlah" min="1" :max="currentMaxStock"
                                                class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none text-sm">
                                     </div>
                                     <div class="md:col-span-2 mt-2">
@@ -192,19 +207,19 @@ $selectedItemId = intval($_GET['item_id'] ?? 0);
                                         <thead>
                                             <tr class="bg-gray-50 dark:bg-gray-900/50 text-xs text-gray-500 uppercase">
                                                 <th class="p-3">Item</th>
-                                                <th class="p-3">Qty</th>
+                                                <th class="p-3">Jumlah</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <template x-for="(item, index) in $store.cart.items" :key="item.id">
+                                            <template x-for="(item, index) in $store.cart.items" :key="item.inventaris_id">
                                                 <tr class="border-b border-gray-50 dark:border-gray-700/50 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                                                     <td class="p-3">
                                                         <span class="font-medium text-gray-900 dark:text-white" x-text="item.name"></span>
                                                         <span class="text-xs text-gray-500 block" x-text="item.category"></span>
                                                     </td>
-                                                    <td class="p-3 font-medium text-gray-900 dark:text-white" x-text="item.qty"></td>
+                                                    <td class="p-3 font-medium text-gray-900 dark:text-white" x-text="item.jumlah"></td>
                                                     <td class="p-3">
-                                                        <button @click="$store.cart.remove(index)" class="text-red-500 hover:text-red-700 transition-colors p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                                                        <button @click="$store.cart.remove(item.inventaris_id)" class="text-red-500 hover:text-red-700 transition-colors p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
                                                             <!-- Trash Icon -->
                                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
                                                         </button>
@@ -228,12 +243,12 @@ $selectedItemId = intval($_GET['item_id'] ?? 0);
                                 
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Borrowed Date</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Borrowed Date <span class="text-red-500">*</span></label>
                                         <input type="date" name="tanggal_pinjam" required
                                                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all">
                                     </div>
                                     <div>
-                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Purpose / Notes</label>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Purpose / Notes <span class="text-red-500">*</span></label>
                                         <input type="text" name="keterangan" placeholder="e.g. For project X presentation" required
                                                class="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 outline-none transition-all">
                                     </div>
@@ -267,7 +282,7 @@ $selectedItemId = intval($_GET['item_id'] ?? 0);
             Alpine.data('loanRequestApp', (items, initialSelectedId) => ({
                 availableItems: items,
                 currentItemId: '',
-                currentQty: 1,
+                currentJumlah: 1,
                 currentMaxStock: 0,
                 // Note: Cart is now global via $store.cart
 
@@ -282,15 +297,15 @@ $selectedItemId = intval($_GET['item_id'] ?? 0);
                     const item = this.availableItems.find(i => i.id == this.currentItemId);
                     if (item) {
                         this.currentMaxStock = item.stok_tersedia;
-                        this.currentQty = 1;
+                        this.currentJumlah = 1;
                     } else {
                         this.currentMaxStock = 0;
-                        this.currentQty = 0;
+                        this.currentJumlah = 0;
                     }
                 },
 
                 get isValidItem() {
-                    return this.currentItemId && this.currentQty > 0 && this.currentQty <= this.currentMaxStock;
+                    return this.currentItemId && this.currentJumlah > 0 && this.currentJumlah <= this.currentMaxStock;
                 },
 
                 addToCart() {
@@ -299,11 +314,11 @@ $selectedItemId = intval($_GET['item_id'] ?? 0);
                     const item = this.availableItems.find(i => i.id == this.currentItemId);
                     if (item) {
                         // Use global store
-                        Alpine.store('cart').add(item, this.currentQty, this.currentNote);
+                        Alpine.store('cart').add(item, this.currentJumlah, this.currentNote);
                         
                         // Reset form
                         this.currentItemId = '';
-                        this.currentQty = 1;
+                        this.currentJumlah = 1;
                         this.currentMaxStock = 0;
                         this.currentNote = '';
                     }

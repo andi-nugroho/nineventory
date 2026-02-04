@@ -107,6 +107,7 @@ $myLoans = $loan->getByUserId($currentUser['id']);
                                     <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400">
                                         <tr>
                                             <th class="px-6 py-4 font-semibold">Request ID</th>
+                                            <th class="px-6 py-4 font-semibold">For Employee</th>
                                             <th class="px-6 py-4 font-semibold">Items</th>
                                             <th class="px-6 py-4 font-semibold">Borrowed Date</th>
                                             <th class="px-6 py-4 font-semibold">Return Date</th>
@@ -120,9 +121,15 @@ $myLoans = $loan->getByUserId($currentUser['id']);
                                             <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
                                                 <?= htmlspecialchars($item['kode_peminjaman'] ?? 'LOAN-'.$item['id']) ?>
                                             </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate" title="<?= htmlspecialchars($item['items_summary']) ?>">
-                                                <?= htmlspecialchars($item['items_summary']) ?>
-                                                <span class="text-xs text-gray-400 block mt-0.5"><?= $item['total_items'] ?> item(s)</span>
+                                            <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                                <?= htmlspecialchars($item['nama_karyawan'] ?? '-') ?>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
+                                                <ul class="list-disc pl-5 space-y-1">
+                                                    <?php foreach ($item['details'] as $detail): ?>
+                                                        <li><?= htmlspecialchars($detail['nama_barang']) ?> <span class="text-xs">(x<?= $detail['jumlah'] ?>)</span></li>
+                                                    <?php endforeach; ?>
+                                                </ul>
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= date('M d, Y', strtotime($item['tanggal_pinjam'])) ?></td>
                                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= $item['tanggal_kembali'] ? date('M d, Y', strtotime($item['tanggal_kembali'])) : '-' ?></td>

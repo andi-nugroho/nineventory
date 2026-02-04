@@ -9,49 +9,49 @@ document.addEventListener('alpine:init', () => {
             });
         },
 
-        add(item, qty = 1, notes = '') {
-            qty = parseInt(qty);
-            const existing = this.items.find(i => i.id === item.id);
+        add(item, jumlah = 1, notes = '') {
+            jumlah = parseInt(jumlah);
+            const existing = this.items.find(i => i.inventaris_id === item.id);
             if (existing) {
                 // Ensure we don't exceed max stock
-                const newQty = existing.qty + qty;
-                if (newQty <= item.stok_tersedia) {
-                    existing.qty = newQty;
+                const newJumlah = existing.jumlah + jumlah;
+                if (newJumlah <= item.stok_tersedia) {
+                    existing.jumlah = newJumlah;
                     // Optional: Append notes or overwrite? Let's overwrite if provided, or keep existing.
                     if (notes) existing.notes = notes;
                 } else {
                     alert(`Maximum stock for ${item.nama_barang} is ${item.stok_tersedia}`);
-                    existing.qty = item.stok_tersedia;
+                    existing.jumlah = item.stok_tersedia;
                 }
             } else {
                 this.items.push({
-                    id: item.id,
+                    inventaris_id: item.id,
                     name: item.nama_barang,
                     category: item.kategori,
                     maxStock: item.stok_tersedia,
-                    qty: qty,
+                    jumlah: jumlah,
                     notes: notes
                 });
             }
         },
 
-        updateQty(id, newQty) {
-            const item = this.items.find(i => i.id === id);
+        updateQty(inventaris_id, newJumlah) {
+            const item = this.items.find(i => i.inventaris_id === inventaris_id);
             if (item) {
-                newQty = parseInt(newQty);
-                if (newQty > 0) {
-                    if (newQty <= item.maxStock) {
-                        item.qty = newQty;
+                newJumlah = parseInt(newJumlah);
+                if (newJumlah > 0) {
+                    if (newJumlah <= item.maxStock) {
+                        item.jumlah = newJumlah;
                     } else {
                         alert(`Max stock is ${item.maxStock}`);
-                        item.qty = item.maxStock;
+                        item.jumlah = item.maxStock;
                     }
                 }
             }
         },
 
-        remove(id) {
-            this.items = this.items.filter(i => i.id !== id);
+        remove(inventaris_id) {
+            this.items = this.items.filter(i => i.inventaris_id !== inventaris_id);
         },
 
         clear() {
@@ -60,7 +60,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         get count() {
-            return this.items.reduce((acc, item) => acc + item.qty, 0);
+            return this.items.reduce((acc, item) => acc + item.jumlah, 0);
         },
 
         get hasItems() {

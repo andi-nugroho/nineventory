@@ -114,6 +114,17 @@ class Auth
     }
 
 
+    public function getAllUsers()
+    {
+        try {
+            $stmt = $this->pdo->query("SELECT id, username, email, role FROM users ORDER BY username ASC");
+            return $stmt->fetchAll();
+        } catch (\PDOException $e) {
+            return [];
+        }
+    }
+
+
     public function requireLogin()
     {
         if (!$this->isLoggedIn()) {

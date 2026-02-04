@@ -77,6 +77,10 @@ $pathPrefix = $pathPrefix ?? './';
                     <i data-lucide="package" class="w-5 h-5 text-neutral-700 dark:text-neutral-200"></i>
                     <span class="text-neutral-700 dark:text-neutral-200 text-sm font-medium">Inventory</span>
                 </a>
+                <a href="<?= $pathPrefix ?>admin/employees.php" class="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors <?= $activePage === 'employees' ? 'bg-neutral-100 dark:bg-neutral-800' : '' ?>">
+                    <i data-lucide="users" class="w-5 h-5 text-neutral-700 dark:text-neutral-200"></i>
+                    <span class="text-neutral-700 dark:text-neutral-200 text-sm font-medium">Employees</span>
+                </a>
                 <a href="<?= $pathPrefix ?>admin/loans.php" class="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors <?= $activePage === 'loans' ? 'bg-neutral-100 dark:bg-neutral-800' : '' ?>">
                     <i data-lucide="check-square" class="w-5 h-5 text-neutral-700 dark:text-neutral-200"></i>
                     <span class="text-neutral-700 dark:text-neutral-200 text-sm font-medium">Approvals</span>
@@ -153,6 +157,13 @@ $pathPrefix = $pathPrefix ?? './';
                         <span x-show="open"
                               class="text-neutral-700 dark:text-neutral-200 text-sm font-medium group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
                               style="display: none;">Manage Inventory</span>
+                    </a>
+
+                    <a href="<?= $pathPrefix ?>admin/employees.php" class="flex items-center justify-start gap-3 group/sidebar p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700/50 transition-colors <?= $activePage === 'employees' ? 'bg-neutral-200 dark:bg-neutral-700' : '' ?>">
+                        <i data-lucide="users" class="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0"></i>
+                        <span x-show="open"
+                              class="text-neutral-700 dark:text-neutral-200 text-sm font-medium group-hover/sidebar:translate-x-1 transition duration-150 whitespace-pre inline-block"
+                              style="display: none;">Manage Employees</span>
                     </a>
 
                     <a href="<?= $pathPrefix ?>admin/loans.php" class="flex items-center justify-start gap-3 group/sidebar p-2 rounded-lg hover:bg-neutral-200 dark:hover:bg-neutral-700/50 transition-colors <?= $activePage === 'loans' ? 'bg-neutral-200 dark:bg-neutral-700' : '' ?>">

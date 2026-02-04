@@ -58,12 +58,13 @@ CREATE TABLE peminjaman (
     INDEX idx_tanggal_pinjam (tanggal_pinjam)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Insert default admin user
--- Username: admin, Password: admin123 (hashed with bcrypt)
--- Username: user, Password: user123 (hashed with bcrypt)
-INSERT INTO users (username, email, password, role) VALUES
-('admin', 'admin@nineventory.com', '$2y$10$f6epKe4z4aX1Pp73fXeWKuVRUx4RHBOu.dNTEYe/iyCLHHxeZRLEG', 'admin'),
-('user', 'user@nineventory.com', '$2y$10$Sd01A2RUlxbPrmPJN.zaSe/JVdoUt3dk.qVnBLwutruOG55viGnva', 'user');
+-- Insert default admin user and sample employee users
+-- Default password for all employee users: user123
+INSERT INTO users (id, username, email, password, role) VALUES
+(1, 'admin', 'admin@nineventory.com', '$2y$10$f6epKe4z4aX1Pp73fXeWKuVRUx4RHBOu.dNTEYe/iyCLHHxeZRLEG', 'admin'),
+(2, 'budi.santoso', 'budi.santoso@nineventory.com', '$2y$10$Sd01A2RUlxbPrmPJN.zaSe/JVdoUt3dk.qVnBLwutruOG55viGnva', 'user'),
+(3, 'ani.lestari', 'ani.lestari@nineventory.com', '$2y$10$Sd01A2RUlxbPrmPJN.zaSe/JVdoUt3dk.qVnBLwutruOG55viGnva', 'user'),
+(4, 'rudi.hartono', 'rudi.hartono@nineventory.com', '$2y$10$Sd01A2RUlxbPrmPJN.zaSe/JVdoUt3dk.qVnBLwutruOG55viGnva', 'user');
 
 -- Insert sample inventory data
 INSERT INTO inventaris (nama_barang, kategori, stok_total, stok_tersedia, kondisi, lokasi, deskripsi) VALUES
