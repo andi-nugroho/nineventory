@@ -250,6 +250,7 @@ $items = $inventory->getAll();
                             <table class="w-full text-left">
                                 <thead class="bg-gray-50 dark:bg-gray-700/50 text-xs uppercase text-gray-500 dark:text-gray-400">
                                     <tr>
+                                        <th class="px-6 py-4 font-semibold">Image</th>
                                         <th class="px-6 py-4 font-semibold">Item Name</th>
                                         <th class="px-6 py-4 font-semibold">Category</th>
                                         <th class="px-6 py-4 font-semibold">Stock (Avail/Total)</th>
@@ -261,6 +262,15 @@ $items = $inventory->getAll();
                                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                     <?php foreach ($items as $item): ?>
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
+                                        <td class="px-6 py-4">
+                                            <?php if (!empty($item['image'])): ?>
+                                                <img src="../assets/product/<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['nama_barang']) ?>" class="w-16 h-16 object-cover rounded-lg">
+                                            <?php else: ?>
+                                                <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                                    <i data-lucide="box" class="w-8 h-8 text-gray-400"></i>
+                                                </div>
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="px-6 py-4 font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($item['nama_barang']) ?></td>
                                         <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= htmlspecialchars($item['kategori']) ?></td>
                                         <td class="px-6 py-4 text-sm">

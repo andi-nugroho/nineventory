@@ -231,6 +231,7 @@ $pendingLoans = $loan->getPending();
 
                                     <div class="flex gap-2 mt-auto">
                                         <button @click='openApprovalModal(<?= json_encode($item) ?>)' class="flex-1 py-2 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 transition">Approve</button>
+                                        <a href="loan_detail.php?id=<?= $item['id'] ?>" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-xl font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition">Details</a>
                                         <a href="#" onclick="const reason = prompt('Please enter a reason for rejection:', 'Stok tidak tersedia'); if (reason) { window.location.href = '?action=reject&id=<?= $item['id'] ?>&reason=' + encodeURIComponent(reason); } return false;" class="px-4 py-2 bg-red-100 text-red-600 dark:bg-red-900/20 dark:text-red-400 rounded-xl font-medium hover:bg-red-200 dark:hover:bg-red-900/40 transition">Reject</a>
                                     </div>
                                 </div>
@@ -261,10 +262,16 @@ $pendingLoans = $loan->getPending();
                                 <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                                     <?php foreach ($allLoans as $item): ?>
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors">
-                                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($item['username']) ?></td>
+                                        <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">
+                                            <a href="loan_detail.php?id=<?= $item['id'] ?>" class="hover:text-orange-500 hover:underline">
+                                                <?= htmlspecialchars($item['username']) ?>
+                                            </a>
+                                        </td>
                                         <td class="px-6 py-4 font-medium text-gray-900 dark:text-white"><?= htmlspecialchars($item['nama_karyawan'] ?? '-') ?></td>
                                         <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                                            <?= count($item['details']) ?> item(s)
+                                            <a href="loan_detail.php?id=<?= $item['id'] ?>" class="hover:text-orange-500 hover:underline">
+                                                <?= count($item['details']) ?> item(s)
+                                            </a>
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400"><?= date('M d, Y', strtotime($item['tanggal_pinjam'])) ?></td>
                                         <td class="px-6 py-4">
