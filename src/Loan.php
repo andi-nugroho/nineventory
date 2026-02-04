@@ -475,5 +475,66 @@ class Loan
             return [];
         }
     }
+
+    public function getLoanStatsForUser($user_id)
+    {
+        $stats = [
+            'approved' => 0,
+            'pending' => 0,
+            'overdue' => 0
+        ];
+
+        try {
+            // Get approved count
+            $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM peminjaman WHERE user_id = ? AND status = 'approved'");
+            $stmt->execute([$user_id]);
+            $stats['approved'] = $stmt->fetchColumn();
+
+            // Get pending count
+            $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM peminjaman WHERE user_id = ? AND status = 'pending'");
+            $stmt->execute([$user_id]);
+            $stats['pending'] = $stmt->fetchColumn();
+
+            // Get overdue count
+            $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM peminjaman WHERE user_id = ? AND status = 'approved' AND tanggal_kembali_rencana < CURDATE()");
+            $stmt->execute([$user_id]);
+            $stats['overdue'] = $stmt->fetchColumn();
+
+            return $stats;
+        } catch (\PDOException $e) {
+            return $stats;
+        }
+    }
+
+    public function getActiveLoansByUserId($user_id)
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                "SELECT p.*, e.nama_karyawan
+                 FROM peminjaman p
+                 LEFT JOIN employees e ON p.employee_id = e.id
+                 WHERE p.user_id = ? AND p.status = 'approved'
+                 ORDER BY p.tanggal_kembali_rencana ASC"
+            );
+            $stmt->execute([$user_id]);
+            $loans = $stmt->fetchAll();
+
+            $stmtDetails = $this->pdo->prepare(
+                "SELECT pd.jumlah, i.id as inventaris_id, i.nama_barang, i.image
+                 FROM peminjaman_detail pd
+                 JOIN inventaris i ON pd.inventaris_id = i.id
+                 WHERE pd.peminjaman_id = ?"
+            );
+
+            foreach ($loans as &$loan) {
+                $stmtDetails->execute([$loan['id']]);
+                $loan['details'] = $stmtDetails->fetchAll();
+            }
+
+            return $loans;
+        } catch (\PDOException $e) {
+            return [];
+        }
+    }
 }
 
