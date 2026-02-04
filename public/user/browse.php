@@ -151,9 +151,11 @@ $categories = $inventory->getCategories();
                                             <?= htmlspecialchars($item['kategori']) ?>
                                         </span>
                                     </div>
-                                    <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-1 group-hover:text-orange-500 transition-colors">
-                                        <?= htmlspecialchars($item['nama_barang']) ?>
-                                    </h3>
+                                    <a href="detail.php?id=<?= $item['id'] ?>" class="block">
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-1 group-hover:text-orange-500 transition-colors">
+                                            <?= htmlspecialchars($item['nama_barang']) ?>
+                                        </h3>
+                                    </a>
                                     <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4 flex-1">
                                         <?= htmlspecialchars($item['deskripsi'] ?: 'No description available for this item.') ?>
                                     </p>
