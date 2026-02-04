@@ -134,15 +134,18 @@ $categories = $inventory->getCategories();
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         <?php foreach ($items as $item): ?>
                             <div class="group bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 flex flex-col h-full">
-                                <div class="h-48 bg-gray-100 dark:bg-gray-750 relative overflow-hidden flex items-center justify-center">
+                                    <div class="h-48 bg-gray-100 dark:bg-gray-750 relative overflow-hidden flex items-center justify-center">
                                     <?php if ($item['stok_tersedia'] > 0): ?>
                                         <span class="absolute top-4 right-4 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-sm z-10">Available</span>
                                     <?php else: ?>
                                         <span class="absolute top-4 right-4 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg shadow-sm z-10">Out of Stock</span>
                                     <?php endif; ?>
 
-
-                                    <i data-lucide="box" class="w-16 h-16 text-gray-300 dark:text-gray-600 group-hover:scale-110 transition-transform duration-500"></i>
+                                    <?php if (!empty($item['image'])): ?>
+                                        <img src="../assets/product/<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['nama_barang']) ?>" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                    <?php else: ?>
+                                        <i data-lucide="box" class="w-16 h-16 text-gray-300 dark:text-gray-600 group-hover:scale-110 transition-transform duration-500"></i>
+                                    <?php endif; ?>
                                 </div>
 
                                 <div class="p-6 flex-1 flex flex-col">

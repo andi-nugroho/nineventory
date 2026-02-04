@@ -68,8 +68,8 @@ class Inventory
     {
         try {
             $stmt = $this->pdo->prepare(
-                "INSERT INTO inventaris (nama_barang, kategori, stok_total, stok_tersedia, kondisi, lokasi, deskripsi)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)"
+                "INSERT INTO inventaris (nama_barang, kategori, stok_total, stok_tersedia, kondisi, lokasi, deskripsi, image)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
             );
 
             $stmt->execute([
@@ -79,7 +79,8 @@ class Inventory
                 $data['stok_total'], // stok_tersedia = stok_total initially
                 $data['kondisi'],
                 $data['lokasi'],
-                $data['deskripsi'] ?? null
+                $data['deskripsi'] ?? null,
+                $data['image'] ?? null
             ]);
 
             return ['success' => true, 'message' => 'Barang berhasil ditambahkan', 'id' => $this->pdo->lastInsertId()];
@@ -95,7 +96,7 @@ class Inventory
         try {
             $stmt = $this->pdo->prepare(
                 "UPDATE inventaris
-                 SET nama_barang = ?, kategori = ?, stok_total = ?, kondisi = ?, lokasi = ?, deskripsi = ?
+                 SET nama_barang = ?, kategori = ?, stok_total = ?, kondisi = ?, lokasi = ?, deskripsi = ?, image = ?
                  WHERE id = ?"
             );
 
@@ -106,6 +107,7 @@ class Inventory
                 $data['kondisi'],
                 $data['lokasi'],
                 $data['deskripsi'] ?? null,
+                $data['image'] ?? null,
                 $id
             ]);
 

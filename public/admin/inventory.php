@@ -48,7 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'stok_total' => intval($_POST['stok_total'] ?? 0),
         'kondisi' => $_POST['kondisi'] ?? 'baik',
         'lokasi' => trim($_POST['lokasi'] ?? ''),
-        'deskripsi' => trim($_POST['deskripsi'] ?? '')
+        'deskripsi' => trim($_POST['deskripsi'] ?? ''),
+        'image' => trim($_POST['image'] ?? null) // Add image field
     ];
 
     if (isset($_POST['id']) && !empty($_POST['id'])) {
@@ -220,6 +221,10 @@ $items = $inventory->getAll();
                                         <div>
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
                                             <input type="text" name="lokasi" required value="<?= htmlspecialchars($itemToEdit['lokasi'] ?? '') ?>" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Image Filename</label>
+                                            <input type="text" name="image" value="<?= htmlspecialchars($itemToEdit['image'] ?? '') ?>" placeholder="e.g. laptop.jpg" class="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-orange-500/20 dark:focus:ring-orange-500/40 outline-none">
                                         </div>
                                         <div class="col-span-full">
                                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
