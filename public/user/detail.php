@@ -106,8 +106,12 @@ if (!$item) {
                         <div class="bg-white dark:bg-gray-800 rounded-3xl border border-gray-100 dark:border-gray-700 shadow-lg shadow-orange-500/5">
                             <div class="p-6 md:p-8">
                                 <div class="flex flex-col md:flex-row md:items-start gap-8">
-                                    <div class="w-full md:w-1/3 h-64 bg-gray-100 dark:bg-gray-750 rounded-2xl flex items-center justify-center">
-                                         <i data-lucide="box" class="w-24 h-24 text-gray-300 dark:text-gray-600"></i>
+                                    <div class="w-full md:w-1/3 h-64 bg-gray-100 dark:bg-gray-750 rounded-2xl flex items-center justify-center overflow-hidden">
+                                        <?php if (!empty($item['image'])): ?>
+                                            <img src="../assets/product/<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['nama_barang']) ?>" class="w-full h-full object-cover">
+                                        <?php else: ?>
+                                             <i data-lucide="box" class="w-24 h-24 text-gray-300 dark:text-gray-600"></i>
+                                        <?php endif; ?>
                                     </div>
                                     <div class="flex-1">
                                         <div class="flex items-center justify-between mb-3">
