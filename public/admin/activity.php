@@ -122,8 +122,8 @@ $activities = $loan->getAll();
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-sm truncate" title="<?= htmlspecialchars($item['items_summary']) ?>">
-                                                <?= htmlspecialchars($item['items_summary']) ?>
+                                            <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-sm truncate" title="<?= htmlspecialchars($item['items_summary'] ?? '') ?>">
+                                                <?= htmlspecialchars($item['items_summary'] ?? '') ?>
                                             </td>
                                             <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
                                                 <?= date('M d, Y', strtotime($item['tanggal_pinjam'])) ?>
