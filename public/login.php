@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - NINEVENTORY</title>
-    <link rel="logo" href="logo.svg" type="image/x-icon">
+    <link rel="icon" href="logo.svg" type="image/svg+xml">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <form method="POST" action="" class="space-y-6">
 
                             <div class="flex flex-col items-center gap-2 text-center">
-                                <img src="/assets/images/logo.svg" alt="Vault" class="h-8 w-auto mb-2">
+                                <img src="assets/images/logo.svg" alt="NINEVENTORY" class="h-8 w-auto mb-2">
                                 <h1 class="text-2xl font-bold text-gray-900">Welcome back</h1>
                                 <p class="text-gray-600 text-sm">Login to your NINEVENTORY account</p>
                             </div>
