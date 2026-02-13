@@ -28,8 +28,8 @@ Di phpMyAdmin, buka tab **"SQL"** dan jalankan isi dari setiap file `.sql` sesua
 4. `db_link_employees_to_users.sql`
 5. `db_sample_employee_data.sql`
 6. `db_add_image_column.sql`
-7. 
-6. `db_update_return_date.sql` (OPSIONAL)
+7. `db_populate_images.sql`
+8. `db_update_return_date.sql` (OPSIONAL)
 
 Jika Anda ingin melakukannya dalam satu kali eksekusi, Anda bisa menyalin-tempel isi dari semua file tersebut ke dalam satu tab SQL di phpMyAdmin sesuai urutan di atas.
 
