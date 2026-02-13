@@ -6,11 +6,11 @@ use Nineventory\Auth;
 use Nineventory\Loan;
 
 $auth = new Auth($pdo);
-$auth->requireLogin(); // User can print their own, Admin can print anyone's
+$auth->requireLogin(); 
 
 $loan = new Loan($pdo);
 $id = $_GET['id'] ?? 0;
-// Note: In real app, verify user owns this loan or is admin
+
 $data = $loan->getById($id);
 
 if (!$data) {

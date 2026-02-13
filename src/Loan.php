@@ -42,7 +42,7 @@ class Loan
             );
 
             foreach ($items as $item) {
-                // Defensive check to ensure the required key exists
+
                 if (!isset($item['inventaris_id'])) {
                     throw new \Exception("Data item tidak lengkap: 'inventaris_id' tidak ditemukan.");
                 }
@@ -281,7 +281,7 @@ class Loan
         try {
             $this->pdo->beginTransaction();
 
-            $loan = $this->getById($id); // This now returns header + details
+            $loan = $this->getById($id); 
 
             if (!$loan) {
                 return ['success' => false, 'message' => 'Peminjaman tidak ditemukan'];
@@ -381,7 +381,7 @@ class Loan
                 $details = $stmtDetails->fetchAll();
                 $loan['details'] = $details;
                 
-                // Create a summary of item names for the dashboard
+                
                 $itemNames = array_column($details, 'nama_barang');
                 $loan['items_summary'] = implode(', ', $itemNames);
             }

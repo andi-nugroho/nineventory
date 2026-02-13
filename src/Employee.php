@@ -19,7 +19,7 @@ class Employee
             $stmt->execute([$nama_karyawan, $jabatan, $departemen, $email, $telepon, $user_id]);
             return ['success' => true, 'message' => 'Karyawan berhasil ditambahkan.'];
         } catch (\PDOException $e) {
-            if ($e->errorInfo[1] == 1062) { // Duplicate entry
+            if ($e->errorInfo[1] == 1062) { 
                 return ['success' => false, 'message' => 'Gagal: Alamat email atau akun pengguna sudah digunakan oleh karyawan lain.'];
             }
             return ['success' => false, 'message' => 'Gagal menambahkan karyawan: ' . $e->getMessage()];
@@ -80,7 +80,7 @@ class Employee
             $stmt->execute([$nama_karyawan, $jabatan, $departemen, $email, $telepon, $user_id, $id]);
             return ['success' => true, 'message' => 'Data karyawan berhasil diperbarui.'];
         } catch (\PDOException $e) {
-            if ($e->errorInfo[1] == 1062) { // Duplicate entry
+            if ($e->errorInfo[1] == 1062) { 
                 return ['success' => false, 'message' => 'Gagal: Alamat email atau akun pengguna sudah digunakan oleh karyawan lain.'];
             }
             return ['success' => false, 'message' => 'Gagal memperbarui data karyawan: ' . $e->getMessage()];

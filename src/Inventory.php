@@ -76,7 +76,7 @@ class Inventory
                 $data['nama_barang'],
                 $data['kategori'],
                 $data['stok_total'],
-                $data['stok_total'], // stok_tersedia = stok_total initially
+                $data['stok_total'], 
                 $data['kondisi'],
                 $data['lokasi'],
                 $data['deskripsi'] ?? null,
