@@ -35,3 +35,7 @@ Berikut adalah data login untuk akun karyawan contoh. Harap gunakan **Email** da
 -   **Password:** `admin123`
 
 ---
+
+
+# Cohere API (Free API Key)
+-   \\ COHERE_API_KEY=7jj2ckqvPUNgzyRTsfwmaWi3AflGmlpqPl4vFdDB
