@@ -1,4 +1,4 @@
-# Akun Login Karyawan
+# Akun Login KARYAWAN
 
 Berikut adalah data login untuk akun karyawan contoh. Harap gunakan **Email** dan **Password** untuk login, bukan username.
 
@@ -22,5 +22,16 @@ Berikut adalah data login untuk akun karyawan contoh. Harap gunakan **Email** da
 
 -   **Email:** `rudi.hartono@nineventory.com`
 -   **Password:** `password123`
+
+---
+
+# Akun Login ADMIN
+
+---
+
+### 1. SUPER ADMIN
+
+-   **Email:** `admin@nineventory.com`
+-   **Password:** `admin123`
 
 ---
